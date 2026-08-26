@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useGymStore } from '@/lib/store/useGymStore';
 import { AudioVisualizerWave } from './AudioVisualizerWave';
 import { ToolExecutionLogger } from './ToolExecutionLogger';
-import { Sparkles, Terminal, Send, Mic, Play, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Terminal, Send, Play, ChevronUp, ChevronDown } from 'lucide-react';
 
 export function ViernesHud() {
   const {
@@ -24,8 +24,9 @@ export function ViernesHud() {
   const [inputPrompt, setInputPrompt] = useState('');
   const [showLogs, setShowLogs] = useState(false);
   const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Preset Scenario 1: Equipment Breakdown & Class Reschedule (Multi-Tool Chain)
+  // Preset Scenario 1: Equipment Breakdown & Class Reschedule
   const runScenario1 = async () => {
     setActivePreset('scenario1');
     setIsAiProcessing(true);
@@ -33,7 +34,6 @@ export function ViernesHud() {
 
     const start = performance.now();
 
-    // Step 1: Update equipment
     const updated = updateEquipmentStatus('BENCH-03', 'maintenance', 'Snapped cable pulley reported by Coach Marcus');
     highlightEquipment('BENCH-03', 5000);
     logToolExecution({
@@ -44,7 +44,6 @@ export function ViernesHud() {
       latencyMs: Math.round(performance.now() - start),
     });
 
-    // Step 2: Reschedule class to Turf Zone
     setTimeout(() => {
       const res = manageClassSchedule('reschedule', {
         classId: 'CLS-104',
@@ -63,7 +62,7 @@ export function ViernesHud() {
     }, 1200);
   };
 
-  // Preset Scenario 2: Churn Detection & Campaign Dispatch (Multi-Tool Chain)
+  // Preset Scenario 2: Churn Detection & Campaign Dispatch
   const runScenario2 = async () => {
     setActivePreset('scenario2');
     setIsAiProcessing(true);
@@ -71,7 +70,6 @@ export function ViernesHud() {
 
     const start = performance.now();
 
-    // Step 1: Query at-risk members
     const atRisk = filterMembersByCohort('critical', 10);
     logToolExecution({
       toolName: 'query_member_cohorts',
@@ -81,7 +79,6 @@ export function ViernesHud() {
       latencyMs: Math.round(performance.now() - start),
     });
 
-    // Step 2: Launch retention campaign
     setTimeout(() => {
       const campaign = launchRetentionCampaign(
         atRisk.map((m) => m.id),
@@ -101,7 +98,7 @@ export function ViernesHud() {
     }, 1000);
   };
 
-  // Preset Scenario 3: Revenue & Churn Sensitivity Simulation
+  // Preset Scenario 3: Revenue Simulation
   const runScenario3 = async () => {
     setActivePreset('scenario3');
     setIsAiProcessing(true);
@@ -142,93 +139,107 @@ export function ViernesHud() {
 
   return (
     <>
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-4xl">
-        <div className="stark-card rounded-2xl p-3 border-stark-orange/50 shadow-stark-glow bg-surface-400/95 backdrop-blur-xl">
-          {/* Quick Scenario Preset Pills */}
-          <div className="flex items-center gap-2 mb-2.5 overflow-x-auto pb-1">
-            <span className="text-[10px] font-mono uppercase font-bold text-gray-400 flex items-center gap-1 shrink-0">
-              <Sparkles className="w-3 h-3 text-stark-orange" />
-              Agent Co-Pilot Scenarios:
-            </span>
+      <div className="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 w-[96%] max-w-4xl">
+        <div className="stark-card rounded-2xl p-2.5 sm:p-3 border-stark-orange/50 shadow-stark-glow bg-surface-400/95 backdrop-blur-xl">
+          {/* Top Collapse / Presets Bar */}
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 max-w-[85%] sm:max-w-none">
+              <span className="text-[9px] sm:text-[10px] font-mono uppercase font-bold text-gray-400 flex items-center gap-1 shrink-0">
+                <Sparkles className="w-3 h-3 text-stark-orange shrink-0" />
+                <span className="hidden sm:inline">AI Co-Pilot</span> Scenarios:
+              </span>
+              <button
+                onClick={runScenario1}
+                disabled={isAiProcessing}
+                className={`text-[9px] sm:text-[10px] font-mono px-2 py-0.5 sm:py-1 rounded-lg border font-bold shrink-0 transition-all flex items-center gap-1 ${
+                  activePreset === 'scenario1'
+                    ? 'bg-stark-orange text-black border-stark-orange'
+                    : 'bg-surface-100 text-gray-300 border-border-subtle hover:border-stark-orange/50'
+                }`}
+              >
+                <Play className="w-2.5 h-2.5 shrink-0" />
+                1. Broken Cable & Move Class
+              </button>
+              <button
+                onClick={runScenario2}
+                disabled={isAiProcessing}
+                className={`text-[9px] sm:text-[10px] font-mono px-2 py-0.5 sm:py-1 rounded-lg border font-bold shrink-0 transition-all flex items-center gap-1 ${
+                  activePreset === 'scenario2'
+                    ? 'bg-stark-orange text-black border-stark-orange'
+                    : 'bg-surface-100 text-gray-300 border-border-subtle hover:border-stark-orange/50'
+                }`}
+              >
+                <Play className="w-2.5 h-2.5 shrink-0" />
+                2. Churn Radar & Retention
+              </button>
+              <button
+                onClick={runScenario3}
+                disabled={isAiProcessing}
+                className={`text-[9px] sm:text-[10px] font-mono px-2 py-0.5 sm:py-1 rounded-lg border font-bold shrink-0 transition-all flex items-center gap-1 ${
+                  activePreset === 'scenario3'
+                    ? 'bg-stark-orange text-black border-stark-orange'
+                    : 'bg-surface-100 text-gray-300 border-border-subtle hover:border-stark-orange/50'
+                }`}
+              >
+                <Play className="w-2.5 h-2.5 shrink-0" />
+                3. +$6k MRR Boost
+              </button>
+            </div>
+
+            {/* Collapse toggle for mobile screen conservation */}
             <button
-              onClick={runScenario1}
-              disabled={isAiProcessing}
-              className={`text-[10px] font-mono px-2.5 py-1 rounded-lg border font-bold shrink-0 transition-all flex items-center gap-1 ${
-                activePreset === 'scenario1'
-                  ? 'bg-stark-orange text-black border-stark-orange'
-                  : 'bg-surface-100 text-gray-300 border-border-subtle hover:border-stark-orange/50'
-              }`}
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-1 rounded-lg bg-surface-100 text-gray-400 hover:text-white shrink-0 sm:hidden"
             >
-              <Play className="w-2.5 h-2.5" />
-              1. Broken Cable on Bench #3 & Move Class
-            </button>
-            <button
-              onClick={runScenario2}
-              disabled={isAiProcessing}
-              className={`text-[10px] font-mono px-2.5 py-1 rounded-lg border font-bold shrink-0 transition-all flex items-center gap-1 ${
-                activePreset === 'scenario2'
-                  ? 'bg-stark-orange text-black border-stark-orange'
-                  : 'bg-surface-100 text-gray-300 border-border-subtle hover:border-stark-orange/50'
-              }`}
-            >
-              <Play className="w-2.5 h-2.5" />
-              2. Query Churn Radar & Dispatch Perk
-            </button>
-            <button
-              onClick={runScenario3}
-              disabled={isAiProcessing}
-              className={`text-[10px] font-mono px-2.5 py-1 rounded-lg border font-bold shrink-0 transition-all flex items-center gap-1 ${
-                activePreset === 'scenario3'
-                  ? 'bg-stark-orange text-black border-stark-orange'
-                  : 'bg-surface-100 text-gray-300 border-border-subtle hover:border-stark-orange/50'
-              }`}
-            >
-              <Play className="w-2.5 h-2.5" />
-              3. Simulate $6k MRR Boost Scenario
+              {isCollapsed ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
           </div>
 
           {/* Main Input Form */}
-          <form onSubmit={handleCustomPromptSubmit} className="flex items-center gap-2">
-            <div className="relative flex-1 flex items-center">
-              <AudioVisualizerWave isActive={isAiProcessing} />
-              <input
-                type="text"
-                value={inputPrompt}
-                onChange={(e) => setInputPrompt(e.target.value)}
-                placeholder={
-                  isAiProcessing
-                    ? 'Viernes is executing WebMCP DOM tools...'
-                    : "Ask Viernes (e.g. 'Mark Rack 3 for maintenance and move 6 PM class to Turf')..."
-                }
+          {!isCollapsed && (
+            <form onSubmit={handleCustomPromptSubmit} className="flex items-center gap-1.5 sm:gap-2">
+              <div className="relative flex-1 flex items-center">
+                <div className="hidden sm:flex">
+                  <AudioVisualizerWave isActive={isAiProcessing} />
+                </div>
+                <input
+                  type="text"
+                  value={inputPrompt}
+                  onChange={(e) => setInputPrompt(e.target.value)}
+                  placeholder={
+                    isAiProcessing
+                      ? 'Executing WebMCP tools...'
+                      : "Ask Viernes (e.g. 'Mark Rack 3 for maintenance and move 6 PM class')..."
+                  }
+                  disabled={isAiProcessing}
+                  className="w-full pl-2 sm:pl-2 pr-8 sm:pr-10 py-1.5 sm:py-2 rounded-xl bg-surface-100 border border-border-subtle text-[11px] sm:text-xs font-mono text-white placeholder-gray-500 focus:outline-none focus:border-stark-orange"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
                 disabled={isAiProcessing}
-                className="w-full pl-2 pr-10 py-2 rounded-xl bg-surface-100 border border-border-subtle text-xs font-mono text-white placeholder-gray-500 focus:outline-none focus:border-stark-orange"
-              />
-            </div>
+                className="p-2 sm:p-2.5 rounded-xl bg-stark-orange hover:bg-stark-orange/90 text-black font-bold shadow-stark-glow-sm transition-all disabled:opacity-50 shrink-0"
+              >
+                <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </button>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isAiProcessing}
-              className="p-2.5 rounded-xl bg-stark-orange hover:bg-stark-orange/90 text-black font-bold shadow-stark-glow-sm transition-all disabled:opacity-50"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-
-            {/* Telemetry Logger Toggle */}
-            <button
-              type="button"
-              onClick={() => setShowLogs(!showLogs)}
-              className={`p-2.5 rounded-xl border font-mono text-xs flex items-center gap-1.5 transition-all ${
-                showLogs
-                  ? 'bg-stark-cyan text-black border-stark-cyan shadow-hud-cyan'
-                  : 'bg-surface-100 text-gray-300 border-border-subtle hover:border-stark-cyan/50'
-              }`}
-            >
-              <Terminal className="w-4 h-4" />
-              <span className="hidden sm:inline font-bold">Logs ({toolExecutionLogs.length})</span>
-            </button>
-          </form>
+              {/* Telemetry Logger Toggle */}
+              <button
+                type="button"
+                onClick={() => setShowLogs(!showLogs)}
+                className={`p-2 sm:p-2.5 rounded-xl border font-mono text-xs flex items-center gap-1 transition-all shrink-0 ${
+                  showLogs
+                    ? 'bg-stark-cyan text-black border-stark-cyan shadow-hud-cyan'
+                    : 'bg-surface-100 text-gray-300 border-border-subtle hover:border-stark-cyan/50'
+                }`}
+              >
+                <Terminal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden md:inline font-bold">Logs ({toolExecutionLogs.length})</span>
+              </button>
+            </form>
+          )}
         </div>
       </div>
 
