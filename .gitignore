@@ -1,0 +1,119 @@
+# ==============================================================================
+# 🛡️ SECURITY, CREDENTIALS & SENSITIVE DATA EXCLUSIONS
+# ==============================================================================
+# Environment Files & Vaults
+.env
+.env.*
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+.env.vault
+
+# Private Keys, Certificates & Authentication Tokens
+*.pem
+*.key
+*.keystore
+*.crt
+*.pfx
+*.p12
+*.cer
+*.der
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+*.pub
+secring.gpg
+
+# API Keys, Service Accounts & Secrets Dumps
+secrets.json
+secrets.yaml
+secrets.yml
+credentials.json
+credentials.yaml
+credentials.yml
+service-account*.json
+serviceAccountKey.json
+jwt-secret.key
+token.json
+tokens.json
+auth.json
+*.secret
+*.secrets
+
+# Cloud Provider Local Profiles & Configs
+.aws/
+.azure/
+.gcp/
+gcloud/
+
+# Local Databases, SQLite & SQL Dumps
+*.sqlite
+*.sqlite3
+*.db
+*.db3
+*.sql
+*.sql.gz
+
+# ==============================================================================
+# 📦 DEPENDENCIES & PACKAGE MANAGERS
+# ==============================================================================
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ==============================================================================
+# 🏗️ BUILD, CACHE & PRODUCTION OUTPUTS
+# ==============================================================================
+/.next/
+/out/
+/build/
+/dist/
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+
+# Testing & Coverage
+/coverage
+.nyc_output
+
+# ==============================================================================
+# 🪵 LOGS & DIAGNOSTICS
+# ==============================================================================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# ==============================================================================
+# 💻 OS & IDE ARTIFACTS
+# ==============================================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.user
+*.swp
+*.swo
+
+# ==============================================================================
+# 📝 INTERNAL HACKATHON DOCUMENTATION & DEVELOPER NOTES
+# (Ensures only the pristine, public-facing README.md is committed to GitHub)
+# ==============================================================================
+*.md
+!README.md
+docs/
+scratch/
+tmp/
+temp/
