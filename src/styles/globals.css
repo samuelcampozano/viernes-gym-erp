@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #0B0F17;
+    --foreground: #F3F4F6;
+  }
+
+  body {
+    background-color: #0B0F17;
+    color: #F3F4F6;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Scrollbar for Stark Command Bridge */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0F17;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1F293D;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF5500;
+}
+
+/* Stark Glassmorphism & Tactical Card Surfaces */
+.stark-card {
+  background: linear-gradient(135deg, rgba(22, 31, 51, 0.75) 0%, rgba(17, 23, 38, 0.9) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(31, 41, 61, 0.8);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stark-card:hover {
+  border-color: rgba(255, 85, 0, 0.4);
+  box-shadow: 0 0 20px -5px rgba(255, 85, 0, 0.15);
+}
+
+.stark-card-active {
+  background: linear-gradient(135deg, rgba(27, 34, 54, 0.9) 0%, rgba(17, 23, 38, 0.95) 100%);
+  border: 1px solid #FF5500;
+  box-shadow: 0 0 25px -5px rgba(255, 85, 0, 0.3);
+}
+
+/* Glowing text and borders */
+.text-glow-orange {
+  text-shadow: 0 0 12px rgba(255, 85, 0, 0.6);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
+}
+
+.border-glow-orange {
+  border-color: #FF5500;
+  box-shadow: 0 0 15px rgba(255, 85, 0, 0.4);
+}
+
+/* Radar pulse animation for WebMCP-targeted equipment */
+.agent-radar-pulse {
+  position: relative;
+}
+
+.agent-radar-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 2px solid #FF5500;
+  animation: radarPulse 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
