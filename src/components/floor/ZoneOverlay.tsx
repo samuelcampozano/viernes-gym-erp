@@ -2,25 +2,31 @@
 
 import React from 'react';
 import { GymZoneInfo } from '@/lib/store/types';
+import { useGymStore } from '@/lib/store/useGymStore';
+import { Users, Wrench, Shield, CheckCircle2 } from 'lucide-react';
 
 interface ZoneOverlayProps {
   zones: GymZoneInfo[];
 }
 
 export function ZoneOverlay({ zones }: ZoneOverlayProps) {
-  // Visual bounding boxes for the 5 zones on our 2D canvas
+  const { equipment } = useGymStore();
+
   const zoneStyles: Record<string, { left: string; top: string; width: string; height: string }> = {
-    zone_a_racks: { left: '2%', top: '4%', width: '34%', height: '44%' },
-    zone_b_freeweights: { left: '2%', top: '50%', width: '34%', height: '46%' },
-    zone_c_turf: { left: '38%', top: '4%', width: '26%', height: '92%' },
-    zone_d_cardio: { left: '66%', top: '4%', width: '32%', height: '44%' },
-    zone_e_recovery: { left: '66%', top: '50%', width: '32%', height: '46%' },
+    zone_a_racks: { left: '1.5%', top: '3%', width: '35%', height: '45%' },
+    zone_b_freeweights: { left: '1.5%', top: '51%', width: '35%', height: '46%' },
+    zone_c_turf: { left: '38%', top: '3%', width: '26%', height: '94%' },
+    zone_d_cardio: { left: '65.5%', top: '3%', width: '33%', height: '45%' },
+    zone_e_recovery: { left: '65.5%', top: '51%', width: '33%', height: '46%' },
   };
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
       {zones.map((zone) => {
         const bounds = zoneStyles[zone.id] || { left: '0%', top: '0%', width: '100%', height: '100%' };
+        const zoneEquipment = equipment.filter((e) => e.zone === zone.id);
+        const maintenanceAssets = zoneEquipment.filter((e) => e.status === 'maintenance');
+
         return (
           <div
             key={zone.id}
@@ -30,21 +36,48 @@ export function ZoneOverlay({ zones }: ZoneOverlayProps) {
               width: bounds.width,
               height: bounds.height,
             }}
-            className="absolute rounded-xl border border-dashed border-border-subtle/70 bg-surface-100/20 p-3 transition-colors duration-300"
+            className="absolute rounded-2xl border border-dashed border-border-subtle/80 bg-surface-100/15 p-3.5 flex flex-col justify-between transition-colors duration-300"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
+            {/* Zone Header & Dual Telemetry Badges */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              {/* Zone Title */}
+              <div className="flex items-center gap-2">
                 <span
                   style={{ backgroundColor: zone.color }}
-                  className="w-2 h-2 rounded-full shadow-sm"
+                  className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0"
                 />
-                <span className="text-[11px] font-mono font-bold tracking-wider text-gray-300 uppercase">
+                <span className="text-xs font-mono font-black tracking-wider text-white uppercase">
                   {zone.code}: {zone.name}
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-gray-400 bg-surface-300/80 px-1.5 py-0.5 rounded border border-border-subtle">
-                {zone.currentOccupancy}/{zone.capacity} OCCUPIED
-              </span>
+
+              {/* Headcount vs Asset Telemetry */}
+              <div className="flex items-center gap-1.5">
+                {/* Live Athlete Headcount */}
+                <span className="text-[10px] font-mono text-gray-300 bg-surface-300/90 px-2 py-0.5 rounded border border-border-subtle flex items-center gap-1">
+                  <Users className="w-3 h-3 text-stark-cyan" />
+                  <span>{zone.currentOccupancy}/{zone.capacity} Athletes</span>
+                </span>
+
+                {/* Physical Asset Count & Alert Badge */}
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded border flex items-center gap-1 font-bold ${
+                  maintenanceAssets.length > 0
+                    ? 'bg-stark-red/20 text-stark-red border-stark-red/50 animate-pulse'
+                    : 'bg-surface-300/90 text-gray-400 border-border-subtle'
+                }`}>
+                  {maintenanceAssets.length > 0 ? (
+                    <>
+                      <Wrench className="w-3 h-3 text-stark-red" />
+                      <span>{zoneEquipment.length} Racks ({maintenanceAssets.length} Repair)</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-3 h-3 text-stark-emerald" />
+                      <span>{zoneEquipment.length} Assets</span>
+                    </>
+                  )}
+                </span>
+              </div>
             </div>
           </div>
         );
