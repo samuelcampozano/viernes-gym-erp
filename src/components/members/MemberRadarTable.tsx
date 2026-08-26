@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { useGymStore } from '@/lib/store/useGymStore';
 import { ChurnRiskBadge } from './ChurnRiskBadge';
 import { RetentionCampaignDrawer } from './RetentionCampaignDrawer';
-import { Search, Filter, AlertTriangle, ShieldAlert, Sparkles, Mail, Phone, UserCheck, Flame } from 'lucide-react';
+import { ScoreBreakdownModal } from './ScoreBreakdownModal';
+import { Search, Filter, AlertTriangle, ShieldAlert, Sparkles, Mail, Phone, UserCheck, Flame, HelpCircle } from 'lucide-react';
 import { GymMember } from '@/lib/store/types';
 
 export function MemberRadarTable() {
@@ -12,6 +13,7 @@ export function MemberRadarTable() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRisk, setFilterRisk] = useState<string>('all');
   const [filterTier, setFilterTier] = useState<string>('all');
+  const [diagnosticsMember, setDiagnosticsMember] = useState<GymMember | null>(null);
 
   const filteredMembers = members.filter((member) => {
     if (searchQuery && !member.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -78,7 +80,12 @@ export function MemberRadarTable() {
               <tr>
                 <th className="p-3.5">Member Identity</th>
                 <th className="p-3.5">Tier</th>
-                <th className="p-3.5">Churn Risk</th>
+                <th className="p-3.5">
+                  <div className="flex items-center gap-1">
+                    <span>Churn Risk (XAI)</span>
+                    <HelpCircle className="w-3 h-3 text-stark-orange" />
+                  </div>
+                </th>
                 <th className="p-3.5">Last Visit</th>
                 <th className="p-3.5">Monthly</th>
                 <th className="p-3.5">Discipline</th>
@@ -93,10 +100,16 @@ export function MemberRadarTable() {
                     <img
                       src={member.avatar}
                       alt={member.name}
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-border-subtle shrink-0"
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-border-subtle shrink-0 cursor-pointer hover:border-stark-orange transition-colors"
+                      onClick={() => setDiagnosticsMember(member)}
                     />
                     <div>
-                      <div className="font-bold text-white text-xs sm:text-sm">{member.name}</div>
+                      <div
+                        className="font-bold text-white text-xs sm:text-sm cursor-pointer hover:text-stark-orange transition-colors"
+                        onClick={() => setDiagnosticsMember(member)}
+                      >
+                        {member.name}
+                      </div>
                       <div className="text-[10px] text-gray-400 truncate max-w-[140px]">{member.id}</div>
                     </div>
                   </td>
@@ -114,9 +127,13 @@ export function MemberRadarTable() {
                     </span>
                   </td>
 
-                  {/* Churn Risk */}
+                  {/* Churn Risk Badge with Click-to-Explain Modal */}
                   <td className="p-3.5">
-                    <ChurnRiskBadge score={member.churnRiskScore} riskLevel={member.riskLevel} />
+                    <ChurnRiskBadge
+                      score={member.churnRiskScore}
+                      riskLevel={member.riskLevel}
+                      onClick={() => setDiagnosticsMember(member)}
+                    />
                   </td>
 
                   {/* Last Visit */}
@@ -154,6 +171,14 @@ export function MemberRadarTable() {
 
       {/* Slide-out Campaign Drawer */}
       <RetentionCampaignDrawer />
+
+      {/* Explainable AI (XAI) Diagnostics Modal */}
+      {diagnosticsMember && (
+        <ScoreBreakdownModal
+          member={diagnosticsMember}
+          onClose={() => setDiagnosticsMember(null)}
+        />
+      )}
     </div>
   );
 }
