@@ -300,20 +300,23 @@ export const useGymStore = create<GymState>()(
         const { members } = get();
         const targeted = members.filter((m) => memberIds.includes(m.id));
         const targetNames = targeted.map((m) => m.name);
+        const firstMember = targeted[0];
+        const firstName = targeted.length === 1 && firstMember ? firstMember.name.split(' ')[0] : 'there';
+        const favoriteClassText = targeted.length === 1 && firstMember?.favoriteClass ? ` around your ${firstMember.favoriteClass} schedule` : '';
 
         let defaultMsg = '';
         switch (offerType) {
           case 'smoothie_voucher':
-            defaultMsg = `Hey [Name]! We miss your energy at Viernes. Your next post-workout protein smoothie at the Fuel Bar is 100% on us! Claim your voucher in the app.`;
+            defaultMsg = `Hey ${firstName}! We miss seeing you at Viernes. Your next post-workout protein smoothie at the Fuel Bar is 100% on us! Claim your voucher in the app.`;
             break;
           case 'pt_session':
-            defaultMsg = `Hi [Name], let's get you back on track! You've unlocked a complimentary 1-on-1 technique & recovery check-in with Coach Marcus this week.`;
+            defaultMsg = `Hi ${firstName}, let's get you back on track! You've unlocked a complimentary 1-on-1 technique & recovery check-in with Coach Marcus this week${favoriteClassText}.`;
             break;
           case 'membership_discount':
-            defaultMsg = `Special VIP renewal offer: Enjoy ${discountPercent}% off your next 3 months of unlimited training. Valid until Sunday!`;
+            defaultMsg = `Special VIP renewal offer for ${firstName}: Enjoy ${discountPercent}% off your next 3 months of unlimited training at Viernes. Valid until Sunday!`;
             break;
           case 'guest_pass':
-            defaultMsg = `Bring your workout partner! You have 2 free VIP Weekend Guest Passes loaded to your member account.`;
+            defaultMsg = `Hey ${firstName}! Bring your workout partner—you have 2 free VIP Weekend Guest Passes loaded to your member account.`;
             break;
         }
 
