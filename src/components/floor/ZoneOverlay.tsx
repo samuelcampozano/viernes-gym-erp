@@ -1,15 +1,18 @@
 'use client';
 
 import React from 'react';
-import { GymZoneInfo } from '@/lib/store/types';
+import { GymZoneInfo, GymZoneId } from '@/lib/store/types';
 import { useGymStore } from '@/lib/store/useGymStore';
-import { Users, Wrench, Shield, CheckCircle2 } from 'lucide-react';
+import { Users, Wrench, Shield, CheckCircle2, Sparkles, ChevronRight } from 'lucide-react';
 
 interface ZoneOverlayProps {
   zones: GymZoneInfo[];
+  selectedZone: string;
+  onSelectZone: (zoneId: string) => void;
+  filterCategory: string;
 }
 
-export function ZoneOverlay({ zones }: ZoneOverlayProps) {
+export function ZoneOverlay({ zones, selectedZone, onSelectZone, filterCategory }: ZoneOverlayProps) {
   const { equipment } = useGymStore();
 
   const zoneStyles: Record<string, { left: string; top: string; width: string; height: string }> = {
@@ -20,12 +23,24 @@ export function ZoneOverlay({ zones }: ZoneOverlayProps) {
     zone_e_recovery: { left: '65.5%', top: '51%', width: '33%', height: '46%' },
   };
 
+  const isZoneHighlighted = (zoneId: GymZoneId) => {
+    if (selectedZone !== 'all') return selectedZone === zoneId;
+    if (filterCategory === 'all') return true;
+    if (filterCategory === 'strength') return zoneId === 'zone_a_racks' || zoneId === 'zone_b_freeweights';
+    if (filterCategory === 'cardio') return zoneId === 'zone_d_cardio';
+    if (filterCategory === 'functional') return zoneId === 'zone_c_turf';
+    if (filterCategory === 'recovery') return zoneId === 'zone_e_recovery';
+    return true;
+  };
+
   return (
-    <div className="absolute inset-0 pointer-events-none z-10">
+    <div className="absolute inset-0 z-10 pointer-events-none">
       {zones.map((zone) => {
         const bounds = zoneStyles[zone.id] || { left: '0%', top: '0%', width: '100%', height: '100%' };
         const zoneEquipment = equipment.filter((e) => e.zone === zone.id);
         const maintenanceAssets = zoneEquipment.filter((e) => e.status === 'maintenance');
+        const highlighted = isZoneHighlighted(zone.id);
+        const isExactSelected = selectedZone === zone.id;
 
         return (
           <div
@@ -36,7 +51,14 @@ export function ZoneOverlay({ zones }: ZoneOverlayProps) {
               width: bounds.width,
               height: bounds.height,
             }}
-            className="absolute rounded-2xl border border-dashed border-border-subtle/80 bg-surface-100/15 p-3.5 flex flex-col justify-between transition-colors duration-300"
+            className={`absolute rounded-2xl border transition-all duration-300 p-3.5 flex flex-col justify-between ${
+              highlighted
+                ? isExactSelected
+                  ? 'border-stark-orange bg-stark-orange/10 shadow-stark-glow-sm pointer-events-auto'
+                  : 'border-border-subtle/80 bg-surface-100/20 hover:border-stark-orange/50 pointer-events-auto cursor-pointer'
+                : 'border-border-subtle/30 bg-surface-400/50 opacity-30 pointer-events-none'
+            }`}
+            onClick={() => onSelectZone(zone.id === selectedZone ? 'all' : zone.id)}
           >
             {/* Zone Header & Dual Telemetry Badges */}
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -46,8 +68,9 @@ export function ZoneOverlay({ zones }: ZoneOverlayProps) {
                   style={{ backgroundColor: zone.color }}
                   className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0"
                 />
-                <span className="text-xs font-mono font-black tracking-wider text-white uppercase">
+                <span className="text-xs font-mono font-black tracking-wider text-white uppercase flex items-center gap-1">
                   {zone.code}: {zone.name}
+                  {isExactSelected && <ChevronRight className="w-3 h-3 text-stark-orange" />}
                 </span>
               </div>
 
@@ -68,7 +91,7 @@ export function ZoneOverlay({ zones }: ZoneOverlayProps) {
                   {maintenanceAssets.length > 0 ? (
                     <>
                       <Wrench className="w-3 h-3 text-stark-red" />
-                      <span>{zoneEquipment.length} Racks ({maintenanceAssets.length} Repair)</span>
+                      <span>{zoneEquipment.length} Assets ({maintenanceAssets.length} Repair)</span>
                     </>
                   ) : (
                     <>
