@@ -10,9 +10,10 @@ interface ZoneOverlayProps {
   selectedZone: string;
   onSelectZone: (zoneId: string) => void;
   filterCategory: string;
+  filterStatus?: string;
 }
 
-export function ZoneOverlay({ zones, selectedZone, onSelectZone, filterCategory }: ZoneOverlayProps) {
+export function ZoneOverlay({ zones, selectedZone, onSelectZone, filterCategory, filterStatus = 'all' }: ZoneOverlayProps) {
   const { equipment } = useGymStore();
 
   const zoneStyles: Record<string, { left: string; top: string; width: string; height: string }> = {
@@ -23,7 +24,8 @@ export function ZoneOverlay({ zones, selectedZone, onSelectZone, filterCategory 
     zone_e_recovery: { left: '65.5%', top: '50.5%', width: '33%', height: '47.5%' },
   };
 
-  const isZoneHighlighted = (zoneId: GymZoneId) => {
+  const isZoneHighlighted = (zoneId: GymZoneId, maintenanceCount: number) => {
+    if (filterStatus === 'maintenance') return maintenanceCount > 0;
     if (selectedZone !== 'all') return selectedZone === zoneId;
     if (filterCategory === 'all') return true;
     if (filterCategory === 'strength') return zoneId === 'zone_a_racks' || zoneId === 'zone_b_freeweights';
@@ -39,7 +41,7 @@ export function ZoneOverlay({ zones, selectedZone, onSelectZone, filterCategory 
         const bounds = zoneStyles[zone.id] || { left: '0%', top: '0%', width: '100%', height: '100%' };
         const zoneEquipment = equipment.filter((e) => e.zone === zone.id);
         const maintenanceAssets = zoneEquipment.filter((e) => e.status === 'maintenance');
-        const highlighted = isZoneHighlighted(zone.id);
+        const highlighted = isZoneHighlighted(zone.id, maintenanceAssets.length);
         const isExactSelected = selectedZone === zone.id;
 
         return (
@@ -55,8 +57,10 @@ export function ZoneOverlay({ zones, selectedZone, onSelectZone, filterCategory 
               highlighted
                 ? isExactSelected
                   ? 'border-stark-orange bg-stark-orange/10 shadow-stark-glow-sm pointer-events-auto'
+                  : maintenanceAssets.length > 0 && filterStatus === 'maintenance'
+                  ? 'border-stark-red/70 bg-stark-red/10 shadow-hud-red pointer-events-auto cursor-pointer'
                   : 'border-border-subtle/80 bg-surface-100/15 hover:border-stark-orange/50 pointer-events-auto cursor-pointer'
-                : 'border-border-subtle/30 bg-surface-400/50 opacity-25 pointer-events-none'
+                : 'border-border-subtle/30 bg-surface-400/50 opacity-20 pointer-events-none'
             }`}
             onClick={() => onSelectZone(zone.id === selectedZone ? 'all' : zone.id)}
           >

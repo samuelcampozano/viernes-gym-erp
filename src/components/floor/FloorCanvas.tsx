@@ -22,6 +22,7 @@ import {
   X,
   LayoutGrid,
   Map,
+  AlertTriangle,
 } from 'lucide-react';
 import { GymEquipment, EquipmentStatus } from '@/lib/store/types';
 
@@ -69,7 +70,20 @@ export function FloorCanvas() {
 
   const handleCategoryClick = (catId: string) => {
     setFilterCategory(catId);
+    setFilterStatus('all');
     setSelectedZone('all');
+  };
+
+  const handleRepairFilterClick = () => {
+    if (filterStatus === 'maintenance') {
+      setFilterStatus('all');
+      setFilterCategory('all');
+      setSelectedZone('all');
+    } else {
+      setFilterStatus('maintenance');
+      setFilterCategory('all');
+      setSelectedZone('all');
+    }
   };
 
   const handleQuickStatusToggle = (item: GymEquipment, newStatus: EquipmentStatus) => {
@@ -91,19 +105,26 @@ export function FloorCanvas() {
             • {filteredEquipment.length}/{equipment.length} ASSETS
           </span>
           {maintenanceCount > 0 && (
-            <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-mono font-bold text-stark-red bg-stark-red/15 px-2 py-0.5 rounded-lg border border-stark-red/30 animate-pulse">
+            <button
+              onClick={handleRepairFilterClick}
+              className={`flex items-center gap-1 text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                filterStatus === 'maintenance'
+                  ? 'bg-stark-red text-white border-stark-red shadow-hud-red ring-2 ring-stark-red/50'
+                  : 'text-stark-red bg-stark-red/15 border-stark-red/30 animate-pulse hover:bg-stark-red/25'
+              }`}
+            >
               <Wrench className="w-3 h-3 shrink-0" />
               {maintenanceCount} REPAIR
-            </span>
+            </button>
           )}
         </div>
 
-        {/* Right: Personalized Category Chips with Live Counts & Icons */}
+        {/* Right: Category Chips with Live Counts & Repair Filter */}
         <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 md:pb-0">
           <div className="flex items-center gap-1 bg-surface-200 p-1 rounded-xl border border-border-subtle shrink-0">
             {categories.map((cat) => {
               const Icon = cat.icon;
-              const isActive = filterCategory === cat.id && selectedZone === 'all';
+              const isActive = filterCategory === cat.id && filterStatus === 'all' && selectedZone === 'all';
               return (
                 <button
                   key={cat.id}
@@ -128,12 +149,12 @@ export function FloorCanvas() {
             })}
           </div>
 
-          {/* Maintenance Quick Focus Button */}
+          {/* Maintenance Focus Button */}
           <button
-            onClick={() => setFilterStatus(filterStatus === 'maintenance' ? 'all' : 'maintenance')}
+            onClick={handleRepairFilterClick}
             className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-mono font-bold border transition-all flex items-center gap-1 shrink-0 ${
               filterStatus === 'maintenance'
-                ? 'bg-stark-red text-white border-stark-red shadow-hud-red'
+                ? 'bg-stark-red text-white border-stark-red shadow-hud-red scale-[1.03]'
                 : 'bg-surface-200 text-gray-400 border-border-subtle hover:border-stark-red/40 hover:text-white'
             }`}
           >
@@ -141,7 +162,7 @@ export function FloorCanvas() {
             <span className="hidden sm:inline">Repair</span> ({maintenanceCount})
           </button>
 
-          {/* Mobile View Toggle (Blueprint vs Grid List) */}
+          {/* Mobile View Toggle */}
           <div className="flex md:hidden items-center bg-surface-200 p-0.5 rounded-xl border border-border-subtle shrink-0">
             <button
               onClick={() => setMobileViewMode('blueprint')}
@@ -190,6 +211,7 @@ export function FloorCanvas() {
             selectedZone={selectedZone}
             onSelectZone={setSelectedZone}
             filterCategory={filterCategory}
+            filterStatus={filterStatus}
           />
 
           {/* Equipment Nodes */}
@@ -249,22 +271,30 @@ export function FloorCanvas() {
       )}
 
       {/* Personalized Sector Detail & Quick Asset Control Panel */}
-      {(filterCategory !== 'all' || selectedZone !== 'all') && (
+      {(filterCategory !== 'all' || selectedZone !== 'all' || filterStatus === 'maintenance') && (
         <div className="stark-card rounded-2xl p-4 sm:p-5 border-stark-orange/40 bg-surface-200/90 animate-slideUp">
           <div className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-border-subtle mb-3 sm:mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-stark-orange/20 text-stark-orange border border-stark-orange/30 shrink-0">
-                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <div className={`p-1.5 sm:p-2 rounded-lg border shrink-0 ${
+                filterStatus === 'maintenance'
+                  ? 'bg-stark-red/20 text-stark-red border-stark-red/40 animate-pulse'
+                  : 'bg-stark-orange/20 text-stark-orange border-stark-orange/30'
+              }`}>
+                {filterStatus === 'maintenance' ? <Wrench className="w-4 h-4 text-stark-red" /> : <Sparkles className="w-4 h-4" />}
               </div>
               <div>
                 <h3 className="text-xs font-mono font-bold text-white uppercase flex items-center gap-1.5 sm:gap-2">
                   <span>Sector Focus:</span>
-                  <span className="text-stark-orange truncate max-w-[200px]">
-                    {activeZoneObj ? `${activeZoneObj.code} — ${activeZoneObj.name}` : `${filterCategory.toUpperCase()} ASSETS`}
+                  <span className={filterStatus === 'maintenance' ? 'text-stark-red font-black' : 'text-stark-orange'}>
+                    {filterStatus === 'maintenance'
+                      ? 'FACILITY REPAIR & MAINTENANCE QUEUE'
+                      : activeZoneObj
+                      ? `${activeZoneObj.code} — ${activeZoneObj.name}`
+                      : `${filterCategory.toUpperCase()} ASSETS`}
                   </span>
                 </h3>
                 <p className="text-[10px] sm:text-[11px] font-mono text-gray-400">
-                  {filteredEquipment.length} machines in active sector view • Instant 1-click status control
+                  {filteredEquipment.length} machines in active view • Instant 1-click status control
                 </p>
               </div>
             </div>
@@ -275,7 +305,7 @@ export function FloorCanvas() {
                 setSelectedZone('all');
                 setFilterStatus('all');
               }}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] sm:text-xs font-mono text-gray-400 hover:text-white bg-surface-100 border border-border-subtle hover:border-stark-orange/40 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-mono text-gray-400 hover:text-white bg-surface-100 border border-border-subtle hover:border-stark-orange/40 transition-colors"
             >
               <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               Reset Focus
@@ -297,7 +327,15 @@ export function FloorCanvas() {
                   <span className="font-mono font-black text-xs text-stark-orange">{item.id}</span>
                   <span className="text-[9px] sm:text-[10px] font-mono text-gray-400">{item.hoursLogged} hrs</span>
                 </div>
-                <h4 className="text-xs font-bold text-white font-mono truncate mb-2">{item.name}</h4>
+                <h4 className="text-xs font-bold text-white font-mono truncate mb-1.5">{item.name}</h4>
+
+                {/* Maintenance Notes Highlight if in repair */}
+                {item.maintenanceNotes && (
+                  <div className="mb-2 p-1.5 rounded bg-surface-200/80 border border-stark-red/30 text-[10px] font-mono text-stark-red italic flex items-start gap-1">
+                    <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5 text-stark-red" />
+                    <span className="line-clamp-2">"{item.maintenanceNotes}"</span>
+                  </div>
+                )}
 
                 {/* 1-Click Status Pills */}
                 <div className="flex items-center gap-1 pt-2 border-t border-border-subtle/60">
