@@ -171,10 +171,10 @@ export function FloorCanvas() {
       </div>
 
       {/* 2D Interactive Vector Blueprint Canvas */}
-      <div className={`stark-card rounded-2xl p-2 sm:p-4 relative min-h-[520px] sm:min-h-[620px] w-full overflow-x-auto border border-border-subtle bg-surface-300 ${
+      <div className={`stark-card rounded-2xl p-2 sm:p-4 relative min-h-[580px] sm:min-h-[660px] w-full overflow-x-auto border border-border-subtle bg-surface-300 ${
         mobileViewMode === 'list' ? 'hidden md:block' : 'block'
       }`}>
-        <div className="min-w-[680px] md:min-w-full relative h-[500px] sm:h-[580px]">
+        <div className="min-w-[720px] md:min-w-full relative h-[560px] sm:h-[640px]">
           {/* Floor Blueprint Grid Background */}
           <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#FF5500_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
 

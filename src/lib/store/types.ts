@@ -1,23 +1,24 @@
-// ==============================================================================
-// 🏛️ VIERNES TYPE DEFINITIONS & PROTOCOL INTERFACES
-// ==============================================================================
+export type GymZoneId =
+  | 'zone_a_racks'
+  | 'zone_b_freeweights'
+  | 'zone_c_turf'
+  | 'zone_d_cardio'
+  | 'zone_e_recovery';
 
-// 1. Spatial & Floor Plan Types
-export type EquipmentStatus = 'operational' | 'maintenance' | 'reserved' | 'in_use';
-export type GymZoneId = 'zone_a_racks' | 'zone_b_freeweights' | 'zone_c_turf' | 'zone_d_cardio' | 'zone_e_recovery';
+export type EquipmentStatus = 'operational' | 'maintenance' | 'in_use' | 'reserved';
+export type EquipmentCategory = 'strength' | 'cardio' | 'functional' | 'recovery';
 
 export interface GymEquipment {
-  id: string; // e.g., "RACK-01", "CABLE-02", "TREADMILL-03"
+  id: string;
   name: string;
-  category: 'strength' | 'cardio' | 'functional' | 'recovery';
+  category: EquipmentCategory;
   zone: GymZoneId;
-  x: number; // Percent on 2D canvas (0 - 100)
-  y: number; // Percent on 2D canvas (0 - 100)
+  x: number; // Percentage relative to floor canvas (0-100)
+  y: number; // Percentage relative to floor canvas (0-100)
   status: EquipmentStatus;
   hoursLogged: number;
   maintenanceNotes?: string;
-  highlighted?: boolean; // Set true when AI agent is interacting
-  lastInspected?: string;
+  highlighted?: boolean;
 }
 
 export interface GymZoneInfo {
@@ -41,12 +42,11 @@ export interface GymClass {
   trainerAvatar?: string;
   zone: GymZoneId;
   zoneName: string;
-  timeSlot: string; // e.g. "07:00 - 08:00", "17:30 - 18:30"
+  timeSlot: string; // e.g. "06:30 - 07:30"
   dayOfWeek: DayOfWeek;
   capacity: number;
   bookedCount: number;
   intensity: 'low' | 'medium' | 'high' | 'extreme';
-  hasConflict?: boolean;
 }
 
 export interface GymTrainer {
@@ -75,8 +75,8 @@ export interface GymMember {
   monthlySpend: number;
   favoriteClass: string;
   email: string;
-  phone: string;
-  status: 'active' | 'at_risk' | 'churned';
+  phone?: string;
+  status?: 'active' | 'at_risk' | 'churned';
   notes?: string;
 }
 
@@ -98,27 +98,30 @@ export interface RetentionCampaignQueue {
 export interface FacilityTelemetry {
   currentOccupancy: number;
   maxCapacity: number;
-  mrr: number; // Monthly Recurring Revenue ($)
-  equipmentUptimePct: number;
-  churnRatePct: number;
   activeMembersCount: number;
+  mrr: number; // Monthly Recurring Revenue ($)
+  equipmentUptimePct: number; // Percentage (e.g. 96.5%)
+  highRiskChurnCount: number;
+  peakHourForecast: string;
+  hvacStatus: 'optimal_68f' | 'cooling_surge' | 'eco_mode';
+  lightingStatus: 'tactical_obsidian' | 'competition_pulse' | 'standard';
 }
 
 export interface RevenueSimulationState {
   baseMRR: number;
   projectedMRR: number;
-  priceAdjustmentPercent: number;
-  classCapacityDelta: number;
-  churnReductionTargetPct: number;
+  priceAdjustmentPercent: number; // e.g. +5%
+  classCapacityDelta: number; // e.g. +4 spots
+  churnReductionTargetPct: number; // e.g. -20% churn
 }
 
-// 6. WebMCP Tool Telemetry Logs
+// 6. WebMCP Tool Telemetry Logger
 export interface WebMCPToolExecutionLog {
   id: string;
   timestamp: string;
   toolName: string;
-  parameters: Record<string, any>;
-  result: Record<string, any>;
+  parameters: any;
+  result: any;
   status: 'success' | 'error';
   latencyMs: number;
 }

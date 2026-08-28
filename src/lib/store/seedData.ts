@@ -49,43 +49,43 @@ export const INITIAL_ZONES: GymZoneInfo[] = [
 ];
 
 export const INITIAL_EQUIPMENT: GymEquipment[] = [
-  // Zone A: Olympic Racks (Top Left)
-  { id: 'RACK-01', name: 'Rogue Monster Power Rack 1', category: 'strength', zone: 'zone_a_racks', x: 8, y: 15, status: 'operational', hoursLogged: 1420 },
-  { id: 'RACK-02', name: 'Rogue Monster Power Rack 2', category: 'strength', zone: 'zone_a_racks', x: 18, y: 15, status: 'operational', hoursLogged: 1310 },
-  { id: 'RACK-03', name: 'Eleiko Olympic Bench & Platform', category: 'strength', zone: 'zone_a_racks', x: 28, y: 15, status: 'maintenance', hoursLogged: 2150, maintenanceNotes: 'Left safety catch pin bent. Replacement ordered.' },
-  { id: 'RACK-04', name: 'Hammer Strength Power Cage', category: 'strength', zone: 'zone_a_racks', x: 8, y: 32, status: 'operational', hoursLogged: 980 },
-  { id: 'RACK-05', name: 'Deadlift Deadzone Platform', category: 'strength', zone: 'zone_a_racks', x: 18, y: 32, status: 'in_use', hoursLogged: 1740 },
-  { id: 'RACK-06', name: 'Arsenal Olympic Incline Station', category: 'strength', zone: 'zone_a_racks', x: 28, y: 32, status: 'operational', hoursLogged: 1100 },
+  // Zone A: Olympic Racks (Top Left: x in [7..30], y in [22..40])
+  { id: 'RACK-01', name: 'Rogue Monster Power Rack 1', category: 'strength', zone: 'zone_a_racks', x: 8, y: 23, status: 'operational', hoursLogged: 1420 },
+  { id: 'RACK-02', name: 'Rogue Monster Power Rack 2', category: 'strength', zone: 'zone_a_racks', x: 19, y: 23, status: 'operational', hoursLogged: 1310 },
+  { id: 'RACK-03', name: 'Eleiko Olympic Bench & Platform', category: 'strength', zone: 'zone_a_racks', x: 30, y: 23, status: 'maintenance', hoursLogged: 2150, maintenanceNotes: 'Left safety catch pin bent. Replacement ordered.' },
+  { id: 'RACK-04', name: 'Hammer Strength Power Cage', category: 'strength', zone: 'zone_a_racks', x: 8, y: 38, status: 'operational', hoursLogged: 980 },
+  { id: 'RACK-05', name: 'Deadlift Deadzone Platform', category: 'strength', zone: 'zone_a_racks', x: 19, y: 38, status: 'in_use', hoursLogged: 1740 },
+  { id: 'RACK-06', name: 'Arsenal Olympic Incline Station', category: 'strength', zone: 'zone_a_racks', x: 30, y: 38, status: 'operational', hoursLogged: 1100 },
 
-  // Zone B: Free Weights (Bottom Left)
-  { id: 'BENCH-01', name: 'Adjustable Dumbbell Bench #1', category: 'strength', zone: 'zone_b_freeweights', x: 8, y: 60, status: 'operational', hoursLogged: 840 },
-  { id: 'BENCH-02', name: 'Adjustable Dumbbell Bench #2', category: 'strength', zone: 'zone_b_freeweights', x: 16, y: 60, status: 'operational', hoursLogged: 920 },
-  { id: 'BENCH-03', name: 'Heavy Flat Bench Press #3', category: 'strength', zone: 'zone_b_freeweights', x: 24, y: 60, status: 'operational', hoursLogged: 1890 },
-  { id: 'CABLE-01', name: 'Dual Adjustable Cable Crossover #1', category: 'strength', zone: 'zone_b_freeweights', x: 8, y: 80, status: 'operational', hoursLogged: 2400 },
-  { id: 'CABLE-02', name: 'Lat Pulldown & Low Row Tower', category: 'strength', zone: 'zone_b_freeweights', x: 20, y: 80, status: 'operational', hoursLogged: 2650 },
-  { id: 'PRESS-01', name: '45-Degree Leg Press Machine', category: 'strength', zone: 'zone_b_freeweights', x: 30, y: 80, status: 'in_use', hoursLogged: 3100 },
+  // Zone B: Free Weights (Bottom Left: x in [7..30], y in [70..86])
+  { id: 'BENCH-01', name: 'Adjustable Dumbbell Bench #1', category: 'strength', zone: 'zone_b_freeweights', x: 8, y: 70, status: 'operational', hoursLogged: 840 },
+  { id: 'BENCH-02', name: 'Adjustable Dumbbell Bench #2', category: 'strength', zone: 'zone_b_freeweights', x: 19, y: 70, status: 'operational', hoursLogged: 920 },
+  { id: 'BENCH-03', name: 'Heavy Flat Bench Press #3', category: 'strength', zone: 'zone_b_freeweights', x: 30, y: 70, status: 'operational', hoursLogged: 1890 },
+  { id: 'CABLE-01', name: 'Dual Adjustable Cable Crossover #1', category: 'strength', zone: 'zone_b_freeweights', x: 8, y: 86, status: 'operational', hoursLogged: 2400 },
+  { id: 'CABLE-02', name: 'Lat Pulldown & Low Row Tower', category: 'strength', zone: 'zone_b_freeweights', x: 19, y: 86, status: 'operational', hoursLogged: 2650 },
+  { id: 'PRESS-01', name: '45-Degree Leg Press Machine', category: 'strength', zone: 'zone_b_freeweights', x: 30, y: 86, status: 'in_use', hoursLogged: 3100 },
 
-  // Zone C: Functional Turf Arena (Middle Center)
+  // Zone C: Functional Turf Arena (Middle Center: x in [44..58], y in [24..80])
   { id: 'TURF-01', name: 'Tank M4 All-Surface Sled Track', category: 'functional', zone: 'zone_c_turf', x: 44, y: 25, status: 'operational', hoursLogged: 620 },
-  { id: 'TURF-02', name: 'Kettlebell Bell-Tree Matrix', category: 'functional', zone: 'zone_c_turf', x: 54, y: 25, status: 'operational', hoursLogged: 740 },
-  { id: 'TURF-03', name: 'Plyometric Soft Box Stack', category: 'functional', zone: 'zone_c_turf', x: 44, y: 60, status: 'operational', hoursLogged: 450 },
-  { id: 'TURF-04', name: 'Heavy Battle Rope Anchor #1', category: 'functional', zone: 'zone_c_turf', x: 54, y: 60, status: 'in_use', hoursLogged: 530 },
-  { id: 'TURF-05', name: 'GHD Glute Ham Developer', category: 'functional', zone: 'zone_c_turf', x: 49, y: 82, status: 'operational', hoursLogged: 910 },
+  { id: 'TURF-02', name: 'Kettlebell Bell-Tree Matrix', category: 'functional', zone: 'zone_c_turf', x: 57, y: 25, status: 'operational', hoursLogged: 740 },
+  { id: 'TURF-03', name: 'Plyometric Soft Box Stack', category: 'functional', zone: 'zone_c_turf', x: 44, y: 55, status: 'operational', hoursLogged: 450 },
+  { id: 'TURF-04', name: 'Heavy Battle Rope Anchor #1', category: 'functional', zone: 'zone_c_turf', x: 57, y: 55, status: 'in_use', hoursLogged: 530 },
+  { id: 'TURF-05', name: 'GHD Glute Ham Developer', category: 'functional', zone: 'zone_c_turf', x: 51, y: 80, status: 'operational', hoursLogged: 910 },
 
-  // Zone D: Cardio Velocity Deck (Top Right)
-  { id: 'CARDIO-01', name: 'Woodway Curve Treadmill #1', category: 'cardio', zone: 'zone_d_cardio', x: 70, y: 15, status: 'operational', hoursLogged: 1820 },
-  { id: 'CARDIO-02', name: 'Woodway Curve Treadmill #2', category: 'cardio', zone: 'zone_d_cardio', x: 80, y: 15, status: 'operational', hoursLogged: 1650 },
-  { id: 'CARDIO-03', name: 'Matrix Commercial Treadmill #3', category: 'cardio', zone: 'zone_d_cardio', x: 90, y: 15, status: 'maintenance', hoursLogged: 4120, maintenanceNotes: 'Motor belt slipping during sprint speeds above 14km/h' },
-  { id: 'ROWER-01', name: 'Concept2 RowErg #1', category: 'cardio', zone: 'zone_d_cardio', x: 70, y: 35, status: 'operational', hoursLogged: 1490 },
-  { id: 'ROWER-02', name: 'Concept2 SkiErg #2', category: 'cardio', zone: 'zone_d_cardio', x: 80, y: 35, status: 'operational', hoursLogged: 1220 },
-  { id: 'BIKE-01', name: 'Rogue Echo Air Bike #1', category: 'cardio', zone: 'zone_d_cardio', x: 90, y: 35, status: 'in_use', hoursLogged: 1180 },
+  // Zone D: Cardio Velocity Deck (Top Right: x in [71..93], y in [23..38])
+  { id: 'CARDIO-01', name: 'Woodway Curve Treadmill #1', category: 'cardio', zone: 'zone_d_cardio', x: 71, y: 23, status: 'operational', hoursLogged: 1820 },
+  { id: 'CARDIO-02', name: 'Woodway Curve Treadmill #2', category: 'cardio', zone: 'zone_d_cardio', x: 82, y: 23, status: 'operational', hoursLogged: 1650 },
+  { id: 'CARDIO-03', name: 'Matrix Commercial Treadmill #3', category: 'cardio', zone: 'zone_d_cardio', x: 93, y: 23, status: 'maintenance', hoursLogged: 4120, maintenanceNotes: 'Motor belt slipping during sprint speeds above 14km/h' },
+  { id: 'ROWER-01', name: 'Concept2 RowErg #1', category: 'cardio', zone: 'zone_d_cardio', x: 71, y: 38, status: 'operational', hoursLogged: 1490 },
+  { id: 'ROWER-02', name: 'Concept2 SkiErg #2', category: 'cardio', zone: 'zone_d_cardio', x: 82, y: 38, status: 'operational', hoursLogged: 1220 },
+  { id: 'BIKE-01', name: 'Rogue Echo Air Bike #1', category: 'cardio', zone: 'zone_d_cardio', x: 93, y: 38, status: 'in_use', hoursLogged: 1180 },
 
-  // Zone E: Recovery Lounge (Bottom Right)
-  { id: 'RECOVERY-01', name: 'Plunge XL Pro Cold Water Bath #1', category: 'recovery', zone: 'zone_e_recovery', x: 72, y: 70, status: 'operational', hoursLogged: 820 },
-  { id: 'RECOVERY-02', name: 'Plunge XL Pro Cold Water Bath #2', category: 'recovery', zone: 'zone_e_recovery', x: 82, y: 70, status: 'in_use', hoursLogged: 760 },
-  { id: 'RECOVERY-03', name: 'Clearlight Infrared Sauna Pod', category: 'recovery', zone: 'zone_e_recovery', x: 92, y: 70, status: 'operational', hoursLogged: 1340 },
-  { id: 'RECOVERY-04', name: 'Theragun Pro Recovery Percussion Bar', category: 'recovery', zone: 'zone_e_recovery', x: 77, y: 88, status: 'operational', hoursLogged: 410 },
-  { id: 'RECOVERY-05', name: 'Normatec Compression Boot Hub', category: 'recovery', zone: 'zone_e_recovery', x: 87, y: 88, status: 'operational', hoursLogged: 590 },
+  // Zone E: Recovery Lounge (Bottom Right: x in [71..93], y in [68..83])
+  { id: 'RECOVERY-01', name: 'Plunge XL Pro Cold Water Bath #1', category: 'recovery', zone: 'zone_e_recovery', x: 71, y: 68, status: 'operational', hoursLogged: 820 },
+  { id: 'RECOVERY-02', name: 'Plunge XL Pro Cold Water Bath #2', category: 'recovery', zone: 'zone_e_recovery', x: 82, y: 68, status: 'in_use', hoursLogged: 760 },
+  { id: 'RECOVERY-03', name: 'Clearlight Infrared Sauna Pod', category: 'recovery', zone: 'zone_e_recovery', x: 93, y: 68, status: 'operational', hoursLogged: 1340 },
+  { id: 'RECOVERY-04', name: 'Theragun Pro Recovery Percussion Bar', category: 'recovery', zone: 'zone_e_recovery', x: 76, y: 83, status: 'operational', hoursLogged: 410 },
+  { id: 'RECOVERY-05', name: 'Normatec Compression Boot Hub', category: 'recovery', zone: 'zone_e_recovery', x: 88, y: 83, status: 'operational', hoursLogged: 590 },
 ];
 
 export const INITIAL_TRAINERS: GymTrainer[] = [
@@ -119,33 +119,31 @@ export const INITIAL_CLASSES: GymClass[] = [
   { id: 'CLS-403', title: 'Speed Plyometrics', trainerId: 'TR-04', trainerName: 'Elena Rostova', zone: 'zone_c_turf', zoneName: 'Functional Turf Arena', timeSlot: '18:45 - 19:45', dayOfWeek: 'thu', capacity: 16, bookedCount: 12, intensity: 'high' },
 
   // Friday
-  { id: 'CLS-501', title: 'Friday Heavy Squat Session', trainerId: 'TR-01', trainerName: 'Marcus Vance', zone: 'zone_a_racks', zoneName: 'Olympic Rack Row', timeSlot: '07:00 - 08:00', dayOfWeek: 'fri', capacity: 14, bookedCount: 14, intensity: 'extreme' },
-  { id: 'CLS-502', title: 'Friday Community Team Throwdown', trainerId: 'TR-05', trainerName: 'Jaxson Reed', zone: 'zone_c_turf', zoneName: 'Functional Turf Arena', timeSlot: '17:00 - 18:30', dayOfWeek: 'fri', capacity: 28, bookedCount: 27, intensity: 'extreme' },
+  { id: 'CLS-501', title: 'Friday Community Team Throwdown', trainerId: 'TR-05', trainerName: 'Jaxson Reed', zone: 'zone_c_turf', zoneName: 'Functional Turf Arena', timeSlot: '18:00 - 19:30', dayOfWeek: 'fri', capacity: 28, bookedCount: 27, intensity: 'extreme' },
+  { id: 'CLS-502', title: 'End-of-Week Decompression & Cold Plunge', trainerId: 'TR-03', trainerName: 'Dave Kowalski', zone: 'zone_e_recovery', zoneName: 'Recovery & Cryo Lounge', timeSlot: '19:30 - 20:30', dayOfWeek: 'fri', capacity: 12, bookedCount: 12, intensity: 'low' },
 ];
 
 export const INITIAL_MEMBERS: GymMember[] = [
-  // High Churn Risk Members (>70%)
-  { id: 'MEM-001', name: 'Alexandrea Sterling', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80', tier: 'premium_black', churnRiskScore: 88, riskLevel: 'critical', lastVisitDaysAgo: 16, monthlySpend: 249, favoriteClass: 'Heavy Hypertrophy Wave', email: 'alex.sterling@example.com', phone: '+1 (555) 234-5678', status: 'at_risk', notes: 'VIP Black Tier. Stopped visiting after business trip.' },
-  { id: 'MEM-002', name: 'Derrick Holloway', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80', tier: 'executive', churnRiskScore: 82, riskLevel: 'critical', lastVisitDaysAgo: 19, monthlySpend: 399, favoriteClass: 'Structural Mobility & Joint Care', email: 'd.holloway@nexusgroup.com', phone: '+1 (555) 345-6789', status: 'at_risk', notes: 'Reported lower back strain 3 weeks ago.' },
-  { id: 'MEM-003', name: 'Jordan Vance', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80', tier: 'standard', churnRiskScore: 78, riskLevel: 'high', lastVisitDaysAgo: 14, monthlySpend: 149, favoriteClass: 'Hyrox Engine & Sled', email: 'jvance99@gmail.com', phone: '+1 (555) 456-7890', status: 'at_risk' },
-  { id: 'MEM-004', name: 'Samantha Wu', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80', tier: 'premium_black', churnRiskScore: 74, riskLevel: 'high', lastVisitDaysAgo: 13, monthlySpend: 249, favoriteClass: 'Metabolic Inferno HIIT', email: 'swu.design@gmail.com', phone: '+1 (555) 567-8901', status: 'at_risk' },
-  { id: 'MEM-005', name: 'Liam O’Connor', avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&auto=format&fit=crop&q=80', tier: 'standard', churnRiskScore: 71, riskLevel: 'high', lastVisitDaysAgo: 12, monthlySpend: 149, favoriteClass: 'Friday Heavy Squat', email: 'loconnor@gmail.com', phone: '+1 (555) 678-9012', status: 'at_risk' },
-
-  // Medium Churn Risk (40 - 69%)
-  { id: 'MEM-006', name: 'Rachel Bennett', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80', tier: 'standard', churnRiskScore: 56, riskLevel: 'medium', lastVisitDaysAgo: 7, monthlySpend: 149, favoriteClass: 'Apex Functional Strength', email: 'rachel.b@techcorp.io', phone: '+1 (555) 789-0123', status: 'active' },
-  { id: 'MEM-007', name: 'Carlos Mendez', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&auto=format&fit=crop&q=80', tier: 'premium_black', churnRiskScore: 48, riskLevel: 'medium', lastVisitDaysAgo: 5, monthlySpend: 249, favoriteClass: 'Olympic Snatch Workshop', email: 'carlos.m@mendezarch.com', phone: '+1 (555) 890-1234', status: 'active' },
-
-  // Low Churn Risk / Loyal VIPs (<40%)
-  { id: 'MEM-008', name: 'Sophia Thorne', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80', tier: 'executive', churnRiskScore: 8, riskLevel: 'low', lastVisitDaysAgo: 1, monthlySpend: 399, favoriteClass: 'Heavy Hypertrophy Wave', email: 'sthorne@luxuryre.com', phone: '+1 (555) 901-2345', status: 'active' },
-  { id: 'MEM-009', name: 'David Kim', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80', tier: 'premium_black', churnRiskScore: 12, riskLevel: 'low', lastVisitDaysAgo: 0, monthlySpend: 249, favoriteClass: 'Hyrox Engine & Sled', email: 'dkim.capital@gmail.com', phone: '+1 (555) 012-3456', status: 'active' },
-  { id: 'MEM-010', name: 'Natalie Brooks', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80', tier: 'standard', churnRiskScore: 15, riskLevel: 'low', lastVisitDaysAgo: 1, monthlySpend: 149, favoriteClass: 'Friday Throwdown', email: 'natbrooks@outlook.com', phone: '+1 (555) 123-4567', status: 'active' },
+  { id: 'MEM-001', name: 'Alexandrea Sterling', email: 'alex.sterling@example.com', tier: 'premium_black', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', churnRiskScore: 88, riskLevel: 'critical', lastVisitDaysAgo: 16, monthlySpend: 249, favoriteClass: 'Heavy Hypertrophy Wave', notes: 'Crossed 14-day inactivity threshold. Attendance dropped from 4x/week to 0.' },
+  { id: 'MEM-002', name: 'Derrick Holloway', email: 'd.holloway@nexusgroup.com', tier: 'executive', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', churnRiskScore: 82, riskLevel: 'critical', lastVisitDaysAgo: 19, monthlySpend: 399, favoriteClass: 'Structural Mobility & Joint Care', notes: 'Reported lower back strain 3 weeks ago; unassisted injury risk.' },
+  { id: 'MEM-003', name: 'Jordan Vance', email: 'jvance99@gmail.com', tier: 'standard', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', churnRiskScore: 78, riskLevel: 'critical', lastVisitDaysAgo: 14, monthlySpend: 149, favoriteClass: 'Apex Functional Strength', notes: 'Standard month-to-month member. Inactive for exactly 2 weeks.' },
+  { id: 'MEM-004', name: 'Samantha Wu', email: 'swu.design@gmail.com', tier: 'premium_black', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80', churnRiskScore: 74, riskLevel: 'high', lastVisitDaysAgo: 13, monthlySpend: 249, favoriteClass: 'Hyrox Engine & Sled Conditioning', notes: 'App engagement dropped 60%.' },
+  { id: 'MEM-005', name: 'Liam O’Connor', email: 'loconnor@gmail.com', tier: 'standard', avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80', churnRiskScore: 71, riskLevel: 'high', lastVisitDaysAgo: 12, monthlySpend: 149, favoriteClass: 'Olympic Snatch Workshop', notes: 'Missed 3 booked sessions without cancelling.' },
+  { id: 'MEM-006', name: 'Rachel Bennett', email: 'rachel.b@techcorp.io', tier: 'standard', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', churnRiskScore: 56, riskLevel: 'medium', lastVisitDaysAgo: 7, monthlySpend: 149, favoriteClass: 'Tactical Agility Drills' },
+  { id: 'MEM-007', name: 'Carlos Mendez', email: 'carlos.m@startup.co', tier: 'standard', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', churnRiskScore: 42, riskLevel: 'medium', lastVisitDaysAgo: 5, monthlySpend: 149, favoriteClass: 'Sprint Velocity & Power Wave' },
+  { id: 'MEM-008', name: 'Sophia Thorne', email: 'sthorne@luxuryre.com', tier: 'executive', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', churnRiskScore: 8, riskLevel: 'low', lastVisitDaysAgo: 1, monthlySpend: 399, favoriteClass: 'Heavy Hypertrophy Wave' },
+  { id: 'MEM-009', name: 'David Kim', email: 'dkim.capital@gmail.com', tier: 'premium_black', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', churnRiskScore: 12, riskLevel: 'low', lastVisitDaysAgo: 0, monthlySpend: 249, favoriteClass: 'Hyrox Engine & Sled' },
+  { id: 'MEM-010', name: 'Natalie Brooks', email: 'natbrooks@outlook.com', tier: 'standard', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80', churnRiskScore: 15, riskLevel: 'low', lastVisitDaysAgo: 1, monthlySpend: 149, favoriteClass: 'Friday Throwdown' },
 ];
 
 export const INITIAL_TELEMETRY: FacilityTelemetry = {
+  activeMembersCount: 480,
   currentOccupancy: 57,
   maxCapacity: 100,
-  mrr: 48250, // $48,250 / month
-  equipmentUptimePct: 92.3, // %
-  churnRatePct: 4.8, // %
-  activeMembersCount: 420,
+  mrr: 98450,
+  equipmentUptimePct: 92.8,
+  highRiskChurnCount: 5,
+  peakHourForecast: '17:30 - 19:30',
+  hvacStatus: 'optimal_68f',
+  lightingStatus: 'tactical_obsidian',
 };

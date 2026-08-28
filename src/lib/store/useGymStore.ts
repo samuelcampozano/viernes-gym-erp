@@ -380,7 +380,7 @@ export const useGymStore = create<GymState>()(
       },
     }),
     {
-      name: 'viernes-gym-storage-v1',
+      name: 'viernes-gym-storage-v2',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         equipment: state.equipment,

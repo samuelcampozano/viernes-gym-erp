@@ -111,7 +111,7 @@ export function ViernesHud() {
       logToolExecution({
         toolName: 'simulate_revenue_forecast',
         parameters: { priceAdjustmentPercent: 5, classCapacityDelta: 8, churnReductionTargetPct: 20 },
-        result,
+        result: result as unknown as Record<string, unknown>,
         status: 'success',
         latencyMs: Math.round(performance.now() - start),
       });
