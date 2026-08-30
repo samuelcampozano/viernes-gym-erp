@@ -23,9 +23,13 @@ export function Header() {
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
         {/* Brand Logo & Identity */}
         <div className="flex items-center gap-2.5 sm:gap-3.5">
-          <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-surface-100 border border-stark-orange/40 shadow-stark-glow-sm shrink-0">
-            <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-stark-orange animate-pulse-slow" />
-            <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-stark-emerald shadow-hud-emerald" />
+          <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-surface-100 border border-stark-orange/50 shadow-stark-glow-sm overflow-hidden shrink-0 group cursor-pointer">
+            <img
+              src="/icon.png"
+              alt="Viernes AI Logo"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+            <div className="absolute -top-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-stark-emerald shadow-hud-emerald border border-surface-400" />
           </div>
           <div>
             <div className="flex items-center gap-1.5 sm:gap-2">
