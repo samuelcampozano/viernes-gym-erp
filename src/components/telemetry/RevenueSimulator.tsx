@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useGymStore } from '@/lib/store/useGymStore';
-import { TrendingUp, DollarSign, Sparkles, Sliders, ShieldCheck } from 'lucide-react';
+import { TrendingUp, DollarSign, Sparkles, Sliders, ShieldCheck, Zap, RotateCcw } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export function RevenueSimulator() {
@@ -21,21 +21,27 @@ export function RevenueSimulator() {
   const delta = target - base;
 
   const chartData = [
-    { month: 'Month 0 (Now)', current: base, projected: base },
-    { month: 'Month 1', current: base, projected: Math.round(base + delta * 0.2) },
-    { month: 'Month 2', current: base, projected: Math.round(base + delta * 0.45) },
-    { month: 'Month 3', current: base, projected: Math.round(base + delta * 0.7) },
-    { month: 'Month 4', current: base, projected: Math.round(base + delta * 0.85) },
-    { month: 'Month 5', current: base, projected: Math.round(base + delta * 0.95) },
-    { month: 'Month 6', current: base, projected: target },
+    { month: 'Month 0 (Now)', baseline: base, projected: base },
+    { month: 'Month 1', baseline: base, projected: Math.round(base + delta * 0.22) },
+    { month: 'Month 2', baseline: base, projected: Math.round(base + delta * 0.48) },
+    { month: 'Month 3', baseline: base, projected: Math.round(base + delta * 0.72) },
+    { month: 'Month 4', baseline: base, projected: Math.round(base + delta * 0.86) },
+    { month: 'Month 5', baseline: base, projected: Math.round(base + delta * 0.94) },
+    { month: 'Month 6', baseline: base, projected: target },
   ];
 
+  const applyPreset = (price: number, cap: number, churn: number) => {
+    setPriceAdj(price);
+    setCapacityDelta(cap);
+    setChurnRed(churn);
+  };
+
   return (
-    <div className="stark-card rounded-2xl p-6 border-border-subtle space-y-6">
+    <div className="stark-card rounded-2xl p-5 sm:p-6 border-border-subtle space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border-subtle">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-stark-orange/15 border border-stark-orange/40 text-stark-orange">
+          <div className="p-2.5 rounded-xl bg-stark-orange/15 border border-stark-orange/40 text-stark-orange shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
@@ -48,6 +54,7 @@ export function RevenueSimulator() {
           </div>
         </div>
 
+        {/* Projected MRR Badge */}
         <div className="flex items-baseline gap-2 bg-surface-100 px-4 py-2 rounded-xl border border-stark-orange/30">
           <span className="text-xs font-mono text-gray-400">Projected MRR:</span>
           <span className="text-xl font-mono font-black text-stark-orange">
@@ -59,8 +66,43 @@ export function RevenueSimulator() {
         </div>
       </div>
 
+      {/* Strategic Scenario Presets Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[10px] font-mono uppercase font-bold text-gray-400 flex items-center gap-1">
+          <Zap className="w-3 h-3 text-stark-orange" />
+          Quick Financial Presets:
+        </span>
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <button
+            onClick={() => applyPreset(0, 4, 10)}
+            className="px-2.5 py-1 rounded-lg bg-surface-100 text-gray-300 hover:text-white hover:border-stark-cyan/50 border border-border-subtle text-[10px] font-mono font-bold uppercase transition-all"
+          >
+            1. Standard (+4 Spots, 10% Churn)
+          </button>
+          <button
+            onClick={() => applyPreset(5, 8, 20)}
+            className="px-2.5 py-1 rounded-lg bg-surface-100 text-stark-orange hover:bg-stark-orange/10 border border-stark-orange/40 text-[10px] font-mono font-bold uppercase transition-all"
+          >
+            2. Hyrox Expansion (+5% Price, +8 Spots)
+          </button>
+          <button
+            onClick={() => applyPreset(15, 12, 30)}
+            className="px-2.5 py-1 rounded-lg bg-surface-100 text-stark-emerald hover:bg-stark-emerald/10 border border-stark-emerald/40 text-[10px] font-mono font-bold uppercase transition-all"
+          >
+            3. Obsidian Maximizer (+15% Price, -30% Churn)
+          </button>
+          <button
+            onClick={() => applyPreset(0, 0, 0)}
+            className="p-1 rounded-lg bg-surface-100 text-gray-400 hover:text-white border border-border-subtle"
+            title="Reset Simulator"
+          >
+            <RotateCcw className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+
       {/* Sliders Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Slider 1: Price Adjustment */}
         <div className="p-4 rounded-xl bg-surface-100 border border-border-subtle space-y-2">
           <div className="flex justify-between text-xs font-mono">
@@ -76,6 +118,11 @@ export function RevenueSimulator() {
             onChange={(e) => setPriceAdj(Number(e.target.value))}
             className="w-full accent-[#FF5500] cursor-pointer"
           />
+          <div className="flex justify-between text-[9px] font-mono text-gray-500">
+            <span>-15%</span>
+            <span>0%</span>
+            <span>+25%</span>
+          </div>
         </div>
 
         {/* Slider 2: Class Capacity Expansion */}
@@ -93,6 +140,11 @@ export function RevenueSimulator() {
             onChange={(e) => setCapacityDelta(Number(e.target.value))}
             className="w-full accent-[#00E5FF] cursor-pointer"
           />
+          <div className="flex justify-between text-[9px] font-mono text-gray-500">
+            <span>0 spots</span>
+            <span>+10 spots</span>
+            <span>+20 spots</span>
+          </div>
         </div>
 
         {/* Slider 3: Churn Reduction */}
@@ -110,13 +162,18 @@ export function RevenueSimulator() {
             onChange={(e) => setChurnRed(Number(e.target.value))}
             className="w-full accent-[#00E676] cursor-pointer"
           />
+          <div className="flex justify-between text-[9px] font-mono text-gray-500">
+            <span>0%</span>
+            <span>-20%</span>
+            <span>-40%</span>
+          </div>
         </div>
       </div>
 
       {/* Recharts Glowing Revenue Curve */}
-      <div className="h-64 w-full">
+      <div className="h-64 sm:h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
             <defs>
               <linearGradient id="projectedGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#FF5500" stopOpacity={0.4} />
@@ -129,6 +186,7 @@ export function RevenueSimulator() {
             <Tooltip
               contentStyle={{ backgroundColor: '#111726', borderColor: '#FF5500', borderRadius: '12px', fontFamily: 'monospace' }}
               labelStyle={{ color: '#FFFFFF', fontWeight: 'bold' }}
+              formatter={(val: any) => [`$${Number(val).toLocaleString()}`, 'Projected MRR']}
             />
             <Area type="monotone" dataKey="projected" stroke="#FF5500" strokeWidth={3} fillOpacity={1} fill="url(#projectedGrad)" name="Projected MRR ($)" />
           </AreaChart>

@@ -60,7 +60,7 @@ export function generateClassesForWeek(year: number, monthIndex: number, weekInd
       const bookedCount = Math.max(1, Math.min(t.capacity, t.baseBookings + bookingVariance));
 
       generated.push({
-        id: `CLS-${year.toString().slice(-2)}${(monthIndex + 1).toString().padStart(2, '0')}W${weekIndex}D${dayIdx + 1}-${i + 1}`,
+        id: `CLS-${(dayIdx + 1) * 100 + (i + 1)}`,
         title: t.title,
         zone: t.zone,
         zoneName: t.zoneName,

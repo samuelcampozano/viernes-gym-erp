@@ -1,15 +1,15 @@
 'use client';
 
 import React from 'react';
-import { Users, Clock, MapPin, AlertCircle, Sparkles, UserCheck } from 'lucide-react';
+import { Users, Clock, MapPin, AlertCircle, Sparkles, UserCheck, Edit3 } from 'lucide-react';
 import { GymClass } from '@/lib/store/types';
 
 interface ClassCardProps {
   gymClass: GymClass;
-  onReschedule?: () => void;
+  onClick?: () => void;
 }
 
-export function ClassCard({ gymClass, onReschedule }: ClassCardProps) {
+export function ClassCard({ gymClass, onClick }: ClassCardProps) {
   const isFull = gymClass.bookedCount >= gymClass.capacity;
   const isNearFull = gymClass.bookedCount / gymClass.capacity >= 0.85;
 
@@ -27,16 +27,22 @@ export function ClassCard({ gymClass, onReschedule }: ClassCardProps) {
   };
 
   return (
-    <div className="stark-card rounded-2xl p-4 flex flex-col justify-between border-border-subtle hover:border-stark-orange/40 transition-all duration-200 group">
+    <div
+      onClick={onClick}
+      className="stark-card rounded-2xl p-4 flex flex-col justify-between border-border-subtle hover:border-stark-orange/60 hover:shadow-stark-glow-sm transition-all duration-200 group cursor-pointer relative"
+    >
       <div>
         {/* Top Badges */}
         <div className="flex items-center justify-between gap-2 mb-2.5">
-          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-surface-100 text-gray-300 border border-border-subtle">
+          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-surface-100 text-stark-orange border border-stark-orange/30">
             {gymClass.id}
           </span>
-          <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded border ${getIntensityBadge()}`}>
-            {gymClass.intensity} INTENSITY
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded border ${getIntensityBadge()}`}>
+              {gymClass.intensity}
+            </span>
+            <Edit3 className="w-3 h-3 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity text-stark-orange" />
+          </div>
         </div>
 
         {/* Title */}

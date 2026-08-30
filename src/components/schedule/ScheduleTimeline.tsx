@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useGymStore } from '@/lib/store/useGymStore';
 import { ClassCard } from './ClassCard';
 import { TrainerRoster } from './TrainerRoster';
+import { ClassDetailModal } from './ClassDetailModal';
 import { DayOfWeek, GymClass } from '@/lib/store/types';
 import { generateClassesForWeek, getWeekDates } from '@/lib/store/scheduleGenerator';
 import {
@@ -16,6 +17,7 @@ import {
   Clock,
   RotateCcw,
   Zap,
+  Plus,
 } from 'lucide-react';
 
 const MONTH_NAMES = [
@@ -34,7 +36,7 @@ const MONTH_NAMES = [
 ];
 
 export function ScheduleTimeline() {
-  const { classes: customClasses, zones } = useGymStore();
+  const { classes: customClasses, zones, manageClassSchedule } = useGymStore();
 
   // Current Hackathon Baseline Date: August 2026, Week 4
   const [selectedYear, setSelectedYear] = useState<number>(2026);
@@ -42,6 +44,7 @@ export function ScheduleTimeline() {
   const [selectedWeek, setSelectedWeek] = useState<number>(4); // Week 4 (Aug 24 - 30, 2026)
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('wed');
   const [selectedZone, setSelectedZone] = useState<string>('all');
+  const [editingClass, setEditingClass] = useState<GymClass | null>(null);
 
   // Compute exact calendar dates for the active week
   const weekDaysInfo = useMemo(() => {
@@ -102,6 +105,18 @@ export function ScheduleTimeline() {
     setSelectedWeek(4);
     setSelectedDay('wed');
     setSelectedZone('all');
+  };
+
+  const handleCreateQuickClass = () => {
+    const res = manageClassSchedule('create', {
+      title: 'Apex Power & Agility Surge',
+      zone: selectedZone !== 'all' ? (selectedZone as any) : 'zone_c_turf',
+      timeSlot: '17:30 - 18:30',
+      capacity: 18,
+    });
+    if (res.affectedClass) {
+      setEditingClass(res.affectedClass);
+    }
   };
 
   return (
@@ -181,14 +196,24 @@ export function ScheduleTimeline() {
             ))}
           </div>
 
-          {/* Jump to Current Hackathon Timeline Button */}
-          <button
-            onClick={handleResetToToday}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-surface-100 hover:bg-surface-50 text-gray-300 hover:text-stark-orange border border-border-subtle hover:border-stark-orange/40 transition-colors"
-          >
-            <Zap className="w-3.5 h-3.5 text-stark-orange" />
-            <span>Today (Aug 2026)</span>
-          </button>
+          {/* Action Buttons: Add Session & Jump to Today */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCreateQuickClass}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-stark-orange hover:bg-stark-orange/90 text-black shadow-stark-glow-sm transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Session</span>
+            </button>
+
+            <button
+              onClick={handleResetToToday}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-surface-100 hover:bg-surface-50 text-gray-300 hover:text-stark-orange border border-border-subtle hover:border-stark-orange/40 transition-colors"
+            >
+              <Zap className="w-3.5 h-3.5 text-stark-orange" />
+              <span className="hidden sm:inline">Today</span>
+            </button>
+          </div>
         </div>
 
         {/* Row 2: 7-Day Selector with Exact Dates & Zone Filter */}
@@ -256,7 +281,11 @@ export function ScheduleTimeline() {
       {dayClasses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fadeIn">
           {dayClasses.map((cls) => (
-            <ClassCard key={cls.id} gymClass={cls} />
+            <ClassCard
+              key={cls.id}
+              gymClass={cls}
+              onClick={() => setEditingClass(cls)}
+            />
           ))}
         </div>
       ) : (
@@ -265,14 +294,26 @@ export function ScheduleTimeline() {
           <p className="text-sm font-mono text-gray-400">
             No classes scheduled for {selectedZone === 'all' ? 'any zone' : selectedZone} on this day.
           </p>
-          <p className="text-xs font-mono text-stark-orange mt-1">
-            Tip: Ask Viernes to create or reschedule a class into this slot via WebMCP!
-          </p>
+          <button
+            onClick={handleCreateQuickClass}
+            className="mt-3 px-4 py-2 rounded-xl bg-stark-orange text-black font-mono text-xs font-bold uppercase inline-flex items-center gap-1.5 shadow-stark-glow-sm"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Create First Class Slot
+          </button>
         </div>
       )}
 
       {/* Coaching Staff Availability & Workload Drawer */}
       <TrainerRoster />
+
+      {/* Interactive Class Detail & Manual Management Modal */}
+      {editingClass && (
+        <ClassDetailModal
+          gymClass={editingClass}
+          onClose={() => setEditingClass(null)}
+        />
+      )}
     </div>
   );
 }
