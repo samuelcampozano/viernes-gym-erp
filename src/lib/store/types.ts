@@ -47,6 +47,8 @@ export interface GymClass {
   capacity: number;
   bookedCount: number;
   intensity: 'low' | 'medium' | 'high' | 'extreme';
+  hasConflict?: boolean;
+  conflictReason?: string;
 }
 
 export interface GymTrainer {
@@ -64,6 +66,18 @@ export interface GymTrainer {
 export type MembershipTier = 'standard' | 'premium_black' | 'executive';
 export type ChurnRiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
+export interface XAIDiagnosticInfo {
+  overallScore: number;
+  riskLevel: ChurnRiskLevel;
+  primaryRiskDriver: string;
+  recencyDropPercent: number; // e.g. 70%
+  inactiveDays: number; // e.g. 16 days
+  attendanceDropPct: number; // e.g. 65%
+  riskFactors: string[];
+  recommendedIntervention: string;
+  confidenceScore: number; // e.g. 94.2%
+}
+
 export interface GymMember {
   id: string;
   name: string;
@@ -78,10 +92,15 @@ export interface GymMember {
   phone?: string;
   status?: 'active' | 'at_risk' | 'churned';
   notes?: string;
+  xaiDiagnostics?: XAIDiagnosticInfo;
 }
 
 // 4. Retention Campaign Types
-export type RetentionOfferType = 'smoothie_voucher' | 'pt_session' | 'membership_discount' | 'guest_pass';
+export type RetentionOfferType =
+  | 'smoothie_voucher'
+  | 'pt_session'
+  | 'membership_discount'
+  | 'guest_pass';
 
 export interface RetentionCampaignQueue {
   id: string;

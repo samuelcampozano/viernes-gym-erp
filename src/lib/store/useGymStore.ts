@@ -25,7 +25,13 @@ import {
 
 export type DashboardTab = 'floor' | 'schedule' | 'members' | 'telemetry';
 
-interface GymState {
+export interface RescheduleClassResult {
+  success: boolean;
+  message: string;
+  affectedClass?: GymClass;
+}
+
+export interface GymState {
   // Data Collections
   equipment: GymEquipment[];
   zones: GymZoneInfo[];
@@ -42,7 +48,7 @@ interface GymState {
   toolExecutionLogs: WebMCPToolExecutionLog[];
   isAiProcessing: boolean;
 
-  // Actions
+  // UI Actions
   setActiveTab: (tab: DashboardTab) => void;
   setSelectedEquipment: (equipment: GymEquipment | null) => void;
   setIsAiProcessing: (processing: boolean) => void;
@@ -50,15 +56,25 @@ interface GymState {
 
   // Equipment Actions
   updateEquipmentStatus: (
-    id: string,
+    equipmentId: string,
     status: EquipmentStatus,
     notes?: string,
-    targetZone?: GymZoneId
+    zone?: GymZoneId
   ) => GymEquipment | null;
   highlightEquipment: (id: string, durationMs?: number) => void;
   moveEquipmentCoordinates: (id: string, x: number, y: number) => void;
 
-  // Class Schedule Actions
+  // Class & Schedule Actions
+  rescheduleClass: (
+    classId: string,
+    trainerId?: string,
+    timeSlot?: string,
+    room?: GymZoneId,
+    capacity?: number
+  ) => RescheduleClassResult;
+
+  autoResolveConflict: (classId: string) => RescheduleClassResult;
+
   manageClassSchedule: (
     action: 'create' | 'reschedule' | 'cancel' | 'reassign_trainer',
     payload: {
@@ -69,27 +85,52 @@ interface GymState {
       zone?: GymZoneId;
       capacity?: number;
     }
-  ) => { success: boolean; message: string; affectedClass?: GymClass };
+  ) => RescheduleClassResult;
 
   // Member & Retention Actions
-  filterMembersByCohort: (riskLevel?: string, inactiveDaysMin?: number, tier?: string) => GymMember[];
+  filterMembersByCohort: (
+    riskLevel?: string,
+    inactiveDaysMin?: number,
+    tier?: string
+  ) => GymMember[];
+
+  queueRetentionCampaign: (
+    memberIds: string[],
+    offerType: RetentionOfferType,
+    discountPercent?: number,
+    customMessage?: string
+  ) => RetentionCampaignQueue;
+
   launchRetentionCampaign: (
     memberIds: string[],
     offerType: RetentionOfferType,
     discountPercent?: number,
     customMessage?: string
   ) => RetentionCampaignQueue;
+
   dismissCampaignQueue: () => void;
 
-  // Telemetry & Simulation Actions
+  // Revenue Simulation Actions
+  simulateRevenue: (
+    priceAdjustment?: number,
+    capacityDelta?: number,
+    churnReductionPct?: number
+  ) => RevenueSimulationState;
+
   simulateRevenueForecast: (
     priceAdjustmentPercent?: number,
     classCapacityDelta?: number,
     churnReductionTargetPct?: number
   ) => RevenueSimulationState;
 
-  // Logger
-  logToolExecution: (log: Omit<WebMCPToolExecutionLog, 'id' | 'timestamp'>) => void;
+  // Telemetry Logger
+  appendToolLog: (
+    log: Omit<WebMCPToolExecutionLog, 'id' | 'timestamp'> | WebMCPToolExecutionLog
+  ) => void;
+
+  logToolExecution: (
+    log: Omit<WebMCPToolExecutionLog, 'id' | 'timestamp'> | WebMCPToolExecutionLog
+  ) => void;
 }
 
 export const useGymStore = create<GymState>()(
@@ -138,16 +179,22 @@ export const useGymStore = create<GymState>()(
           },
         }),
 
-      updateEquipmentStatus: (id, status, notes, targetZone) => {
+      // 1. updateEquipmentStatus(equipmentId, status, notes, zone)
+      // Automatically sets highlighted: true and clears it after 4 seconds (4000ms)
+      updateEquipmentStatus: (equipmentId, status, notes, zone) => {
         let updatedItem: GymEquipment | null = null;
         set((state) => {
           const equipment = state.equipment.map((item) => {
-            if (item.id === id || item.name.toLowerCase().includes(id.toLowerCase())) {
+            if (
+              item.id === equipmentId ||
+              item.name.toLowerCase().includes(equipmentId.toLowerCase()) ||
+              item.id.toLowerCase() === equipmentId.toLowerCase()
+            ) {
               updatedItem = {
                 ...item,
                 status,
                 maintenanceNotes: notes !== undefined ? notes : item.maintenanceNotes,
-                zone: targetZone || item.zone,
+                zone: zone || item.zone,
                 highlighted: true,
               };
               return updatedItem;
@@ -155,7 +202,7 @@ export const useGymStore = create<GymState>()(
             return item;
           });
 
-          // Recalculate equipment uptime %
+          // Recalculate facility equipment uptime %
           const operationalCount = equipment.filter(
             (e) => e.status === 'operational' || e.status === 'in_use'
           ).length;
@@ -167,12 +214,13 @@ export const useGymStore = create<GymState>()(
           };
         });
 
-        // Auto-remove highlight after 4 seconds
+        // Async setTimeout: Auto-turn off orange pulse radar highlight after 4 seconds (4000ms)
         if (updatedItem) {
+          const targetId = (updatedItem as GymEquipment).id;
           setTimeout(() => {
             set((state) => ({
               equipment: state.equipment.map((e) =>
-                e.id === (updatedItem as GymEquipment).id ? { ...e, highlighted: false } : e
+                e.id === targetId ? { ...e, highlighted: false } : e
               ),
             }));
           }, 4000);
@@ -206,63 +254,204 @@ export const useGymStore = create<GymState>()(
         }));
       },
 
+      // 2. rescheduleClass(classId, trainerId, timeSlot, room, capacity)
+      rescheduleClass: (classId, trainerId, timeSlot, room, capacity) => {
+        const { classes, trainers, zones } = get();
+
+        const targetClass = classes.find(
+          (c) => c.id === classId || c.title.toLowerCase().includes(classId.toLowerCase())
+        );
+
+        if (!targetClass) {
+          return {
+            success: false,
+            message: `Validation Error: Class "${classId}" not found in current timetable.`,
+          };
+        }
+
+        const newTimeSlot = timeSlot || targetClass.timeSlot;
+        const newZoneId = room || targetClass.zone;
+        const newTrainerId = trainerId || targetClass.trainerId;
+        const newCapacity = capacity !== undefined ? capacity : targetClass.capacity;
+
+        // Validation A: Room Capacity Check
+        const targetZone = zones.find((z) => z.id === newZoneId);
+        if (targetZone && newCapacity > targetZone.capacity) {
+          return {
+            success: false,
+            message: `Validation Error: Requested capacity (${newCapacity}) exceeds maximum room capacity for ${targetZone.name} (${targetZone.capacity}).`,
+          };
+        }
+
+        // Validation B: Trainer Double-Booking Check
+        const targetTrainer = trainers.find(
+          (t) =>
+            t.id === newTrainerId ||
+            t.name.toLowerCase().includes(newTrainerId.toLowerCase())
+        );
+
+        if (targetTrainer) {
+          const conflictingClass = classes.find(
+            (c) =>
+              c.id !== targetClass.id &&
+              c.trainerId === targetTrainer.id &&
+              c.timeSlot === newTimeSlot &&
+              c.dayOfWeek === targetClass.dayOfWeek
+          );
+
+          if (conflictingClass) {
+            return {
+              success: false,
+              message: `Validation Error: Coach ${targetTrainer.name} is already booked for class "${conflictingClass.title}" (${conflictingClass.id}) during time slot ${newTimeSlot}.`,
+            };
+          }
+        }
+
+        // Apply mutation & clear conflict flag
+        let updatedClass: GymClass | undefined;
+        const updatedClasses = classes.map((c) => {
+          if (c.id === targetClass.id) {
+            updatedClass = {
+              ...c,
+              timeSlot: newTimeSlot,
+              zone: newZoneId,
+              zoneName: targetZone ? targetZone.name : c.zoneName,
+              trainerId: targetTrainer ? targetTrainer.id : c.trainerId,
+              trainerName: targetTrainer ? targetTrainer.name : c.trainerName,
+              trainerAvatar: targetTrainer ? targetTrainer.avatar : c.trainerAvatar,
+              capacity: newCapacity,
+              hasConflict: false,
+              conflictReason: undefined,
+            };
+            return updatedClass;
+          }
+          return c;
+        });
+
+        set({ classes: updatedClasses });
+
+        return {
+          success: true,
+          message: `Class ${targetClass.title} (${targetClass.id}) successfully rescheduled to ${newTimeSlot} in ${
+            targetZone?.name || newZoneId
+          } led by Coach ${targetTrainer?.name || targetClass.trainerName}.`,
+          affectedClass: updatedClass,
+        };
+      },
+
+      // 3. autoResolveConflict(classId: string)
+      autoResolveConflict: (classId: string) => {
+        const { classes, trainers, zones } = get();
+
+        const targetClass = classes.find(
+          (c) => c.id === classId || c.title.toLowerCase().includes(classId.toLowerCase())
+        );
+
+        if (!targetClass) {
+          return {
+            success: false,
+            message: `Auto-Resolve Error: Class "${classId}" not found.`,
+          };
+        }
+
+        // Step A: Search for substitute trainer available at this time slot & day
+        const substituteTrainer = trainers.find((t) => {
+          // Must be available on this day
+          if (!t.availableDays.includes(targetClass.dayOfWeek)) return false;
+          // Must NOT have another class at the same timeSlot & dayOfWeek
+          const busy = classes.some(
+            (c) =>
+              c.id !== targetClass.id &&
+              c.trainerId === t.id &&
+              c.timeSlot === targetClass.timeSlot &&
+              c.dayOfWeek === targetClass.dayOfWeek
+          );
+          return !busy;
+        });
+
+        if (substituteTrainer) {
+          let updatedClass: GymClass | undefined;
+          const updatedClasses = classes.map((c) => {
+            if (c.id === targetClass.id) {
+              updatedClass = {
+                ...c,
+                trainerId: substituteTrainer.id,
+                trainerName: substituteTrainer.name,
+                trainerAvatar: substituteTrainer.avatar,
+                hasConflict: false,
+                conflictReason: undefined,
+              };
+              return updatedClass;
+            }
+            return c;
+          });
+
+          set({ classes: updatedClasses });
+          return {
+            success: true,
+            message: `Auto-Resolved Conflict for ${targetClass.title}: Reassigned lead coach to ${substituteTrainer.name} (${substituteTrainer.role}).`,
+            affectedClass: updatedClass,
+          };
+        }
+
+        // Step B: Search for alternative room / zone with sufficient capacity
+        const substituteZone = zones.find((z) => {
+          if (z.id === targetClass.zone) return false;
+          return z.capacity >= targetClass.capacity;
+        });
+
+        if (substituteZone) {
+          let updatedClass: GymClass | undefined;
+          const updatedClasses = classes.map((c) => {
+            if (c.id === targetClass.id) {
+              updatedClass = {
+                ...c,
+                zone: substituteZone.id,
+                zoneName: substituteZone.name,
+                hasConflict: false,
+                conflictReason: undefined,
+              };
+              return updatedClass;
+            }
+            return c;
+          });
+
+          set({ classes: updatedClasses });
+          return {
+            success: true,
+            message: `Auto-Resolved Conflict for ${targetClass.title}: Reallocated to ${substituteZone.name} (Max ${substituteZone.capacity} spots).`,
+            affectedClass: updatedClass,
+          };
+        }
+
+        return {
+          success: false,
+          message: `Auto-Resolve Failed for ${targetClass.title}: No available substitute trainer or alternative room matching required capacity.`,
+        };
+      },
+
       manageClassSchedule: (action, payload) => {
         const { classes, trainers, zones } = get();
 
-        if (action === 'reschedule' && payload.classId) {
-          const targetClass = classes.find((c) => c.id === payload.classId);
-          if (!targetClass) return { success: false, message: `Class ${payload.classId} not found.` };
-
-          const updatedZone = payload.zone ? zones.find((z) => z.id === payload.zone) : undefined;
-          const updatedClasses = classes.map((c) => {
-            if (c.id === payload.classId) {
-              return {
-                ...c,
-                timeSlot: payload.timeSlot || c.timeSlot,
-                zone: payload.zone || c.zone,
-                zoneName: updatedZone ? updatedZone.name : c.zoneName,
-                capacity: payload.capacity || c.capacity,
-              };
-            }
-            return c;
-          });
-
-          set({ classes: updatedClasses });
-          return {
-            success: true,
-            message: `Rescheduled ${targetClass.title} to ${payload.timeSlot || targetClass.timeSlot}`,
-            affectedClass: updatedClasses.find((c) => c.id === payload.classId),
-          };
-        }
-
-        if (action === 'reassign_trainer' && payload.classId && payload.trainerId) {
-          const trainer = trainers.find(
-            (t) => t.id === payload.trainerId || t.name.toLowerCase().includes(payload.trainerId!.toLowerCase())
-          );
-          if (!trainer) return { success: false, message: `Trainer ${payload.trainerId} not found.` };
-
-          const updatedClasses = classes.map((c) => {
-            if (c.id === payload.classId) {
-              return {
-                ...c,
-                trainerId: trainer.id,
-                trainerName: trainer.name,
-                trainerAvatar: trainer.avatar,
-              };
-            }
-            return c;
-          });
-
-          set({ classes: updatedClasses });
-          return {
-            success: true,
-            message: `Reassigned Coach ${trainer.name} to class.`,
-            affectedClass: updatedClasses.find((c) => c.id === payload.classId),
-          };
+        if (action === 'reschedule' || action === 'reassign_trainer') {
+          if (payload.classId) {
+            return get().rescheduleClass(
+              payload.classId,
+              payload.trainerId,
+              payload.timeSlot,
+              payload.zone,
+              payload.capacity
+            );
+          }
         }
 
         if (action === 'create' && payload.title) {
-          const trainer = trainers.find((t) => t.id === payload.trainerId) || trainers[0];
+          const trainer =
+            trainers.find(
+              (t) =>
+                t.id === payload.trainerId ||
+                t.name.toLowerCase().includes((payload.trainerId || '').toLowerCase())
+            ) || trainers[0];
           const zone = zones.find((z) => z.id === payload.zone) || zones[0];
           const newClass: GymClass = {
             id: `CLS-${Math.floor(100 + Math.random() * 900)}`,
@@ -280,29 +469,38 @@ export const useGymStore = create<GymState>()(
           };
 
           set({ classes: [newClass, ...classes] });
-          return { success: true, message: `Created new class: ${newClass.title}`, affectedClass: newClass };
+          return {
+            success: true,
+            message: `Created new class: ${newClass.title} (${newClass.id})`,
+            affectedClass: newClass,
+          };
         }
 
-        return { success: false, message: `Action ${action} could not be completed.` };
+        return { success: false, message: `Action "${action}" could not be completed.` };
       },
 
       filterMembersByCohort: (riskLevel, inactiveDaysMin, tier) => {
         const { members } = get();
         return members.filter((m) => {
           if (riskLevel && riskLevel !== 'all' && m.riskLevel !== riskLevel) return false;
-          if (inactiveDaysMin && m.lastVisitDaysAgo < inactiveDaysMin) return false;
+          if (inactiveDaysMin !== undefined && m.lastVisitDaysAgo < inactiveDaysMin) return false;
           if (tier && tier !== 'all' && m.tier !== tier) return false;
           return true;
         });
       },
 
-      launchRetentionCampaign: (memberIds, offerType, discountPercent = 20, customMessage) => {
+      // 4. queueRetentionCampaign(memberIds, offerType, discountPercent)
+      queueRetentionCampaign: (memberIds, offerType, discountPercent = 20, customMessage) => {
         const { members } = get();
         const targeted = members.filter((m) => memberIds.includes(m.id));
         const targetNames = targeted.map((m) => m.name);
         const firstMember = targeted[0];
-        const firstName = targeted.length === 1 && firstMember ? firstMember.name.split(' ')[0] : 'there';
-        const favoriteClassText = targeted.length === 1 && firstMember?.favoriteClass ? ` around your ${firstMember.favoriteClass} schedule` : '';
+        const firstName =
+          targeted.length === 1 && firstMember ? firstMember.name.split(' ')[0] : 'there';
+        const favoriteClassText =
+          targeted.length === 1 && firstMember?.favoriteClass
+            ? ` around your ${firstMember.favoriteClass} schedule`
+            : '';
 
         let defaultMsg = '';
         switch (offerType) {
@@ -335,52 +533,79 @@ export const useGymStore = create<GymState>()(
         return campaign;
       },
 
+      launchRetentionCampaign: (memberIds, offerType, discountPercent, customMessage) => {
+        return get().queueRetentionCampaign(memberIds, offerType, discountPercent, customMessage);
+      },
+
       dismissCampaignQueue: () => set({ campaignQueue: null }),
 
-      simulateRevenueForecast: (
-        priceAdjustmentPercent = 0,
-        classCapacityDelta = 0,
-        churnReductionTargetPct = 0
+      // 5. simulateRevenue(priceAdjustment, capacityDelta, churnReductionPct)
+      simulateRevenue: (
+        priceAdjustment = 0,
+        capacityDelta = 0,
+        churnReductionPct = 0
       ) => {
         const { telemetry } = get();
         const baseMRR = telemetry.mrr;
 
-        // Financial sensitivity calculation
-        const priceFactor = 1 + priceAdjustmentPercent / 100;
-        const capacityRevenueBoost = classCapacityDelta * 149 * 4;
-        const churnSavedRevenue = (baseMRR * (churnReductionTargetPct / 100)) * 0.8;
+        // Financial sensitivity model calculations
+        const priceFactor = 1 + priceAdjustment / 100;
+        const capacityRevenueBoost = capacityDelta * 149 * 4;
+        const churnSavedRevenue = baseMRR * (churnReductionPct / 100) * 0.8;
 
-        const projectedMRR = Math.round(baseMRR * priceFactor + capacityRevenueBoost + churnSavedRevenue);
+        const projectedMRR = Math.round(
+          baseMRR * priceFactor + capacityRevenueBoost + churnSavedRevenue
+        );
 
         const simulation: RevenueSimulationState = {
           baseMRR,
           projectedMRR,
-          priceAdjustmentPercent,
-          classCapacityDelta,
-          churnReductionTargetPct,
+          priceAdjustmentPercent: priceAdjustment,
+          classCapacityDelta: capacityDelta,
+          churnReductionTargetPct: churnReductionPct,
         };
 
         set({ simulation });
         return simulation;
       },
 
-      logToolExecution: (log) => {
+      simulateRevenueForecast: (priceAdjustmentPercent, classCapacityDelta, churnReductionTargetPct) => {
+        return get().simulateRevenue(
+          priceAdjustmentPercent,
+          classCapacityDelta,
+          churnReductionTargetPct
+        );
+      },
+
+      // 6. appendToolLog(log: ToolExecutionLog)
+      appendToolLog: (log) => {
         const newEntry: WebMCPToolExecutionLog = {
-          ...log,
-          id: `LOG-${Date.now()}`,
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-          }),
+          id: 'id' in log && log.id ? log.id : `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          timestamp:
+            'timestamp' in log && log.timestamp
+              ? log.timestamp
+              : new Date().toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                }),
+          toolName: log.toolName,
+          parameters: log.parameters,
+          result: log.result,
+          status: log.status,
+          latencyMs: log.latencyMs,
         };
         set((state) => ({
           toolExecutionLogs: [newEntry, ...state.toolExecutionLogs.slice(0, 19)],
         }));
       },
+
+      logToolExecution: (log) => {
+        get().appendToolLog(log);
+      },
     }),
     {
-      name: 'viernes-gym-storage-v2',
+      name: 'viernes-gym-state',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         equipment: state.equipment,
@@ -388,6 +613,7 @@ export const useGymStore = create<GymState>()(
         members: state.members,
         telemetry: state.telemetry,
         simulation: state.simulation,
+        toolExecutionLogs: state.toolExecutionLogs,
       }),
     }
   )
