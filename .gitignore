@@ -81,6 +81,13 @@ next-env.d.ts
 /coverage
 .nyc_output
 
+# Binary Video & Large Media Dumps
+public/demo-video/
+*.webm
+*.mp4
+*.mov
+*.avi
+
 # ==============================================================================
 # 🪵 LOGS & DIAGNOSTICS
 # ==============================================================================
